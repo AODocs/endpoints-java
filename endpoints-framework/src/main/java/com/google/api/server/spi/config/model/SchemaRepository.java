@@ -202,7 +202,7 @@ public class SchemaRepository {
       if (propertyType != null) {
         Field.Builder fieldBuilder = Field.builder().setName(propertyName);
         try {
-          Description propertyDescription = type.getRawType().getField(propertyName).getAnnotation(Description.class);
+          Description propertyDescription = type.getRawType().getDeclaredField(propertyName).getAnnotation(Description.class);
           if (propertyDescription != null) {
             fieldBuilder.setDescription(propertyDescription.value());
           }
