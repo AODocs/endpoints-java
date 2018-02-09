@@ -26,6 +26,8 @@ public class FooDescription {
   private String name;
   private int value;
   private String hidden;
+  @ApiResourceProperty(description = "description of choice")
+  private TestEnum choice;
 
   public String getName() {
     return name;
