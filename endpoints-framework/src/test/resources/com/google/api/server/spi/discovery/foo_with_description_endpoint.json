@@ -228,6 +228,10 @@
     "FooDescription": {
       "id": "FooDescription",
       "properties": {
+        "choice": {
+          "$ref": "TestEnum",
+          "description": "description of choice"
+        },
         "name": {
           "description":"description of name",
           "type": "string"
@@ -239,6 +243,18 @@
         }
       },
       "type": "object"
+    },
+    "TestEnum": {
+      "enum": [
+        "VALUE1",
+        "VALUE2"
+      ],
+      "enumDescriptions": [
+        "",
+        ""
+      ],
+      "id":"TestEnum",
+      "type":"string"
     }
   },
   "servicePath": "foo/v1/",
