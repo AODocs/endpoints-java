@@ -15,19 +15,32 @@
  */
 package com.google.api.server.spi;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
+
+import javax.annotation.Nonnull;
+
+import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableList;
+import com.google.common.flogger.FluentLogger;
 
 /**
  * Generic service exception that, in addition to a status message, has a status code, and
  * optionally, response headers to return.
  */
 public class ServiceException extends Exception {
+  private static final FluentLogger logger = FluentLogger.forEnclosingClass();
+  /** Reserved keywords, cannot be set as an extra field key. */
+  public static final List<String> EXTRA_FIELDS_RESERVED_KEYWORDS = ImmutableList.of("domain", "message", "reason");
 
   protected final int statusCode;
   protected final String reason;
   protected final String domain;
   protected Level logLevel;
+  private final Map<String, Object> extraFields = new HashMap<>();
 
   public ServiceException(int statusCode, String statusMessage) {
     super(statusMessage);
@@ -100,6 +113,49 @@ public class ServiceException extends Exception {
 
   public Map<String, String> getHeaders() {
     return null;
+  }
+
+  /**
+   * Adds a new extra field.
+   * @return this
+   * @throws IllegalArgumentException if {@code key} is one of the reserved keyword {@link #EXTRA_FIELDS_RESERVED_KEYWORDS}.
+   */
+  public ServiceException addExtraField(String key, String value) {
+    return addExtraFieldInternal(key, value);
+  }
+
+  /**
+  /**
+   * Adds a new extra field.
+   * @return this
+   * @throws IllegalArgumentException if {@code key} is one of the reserved keyword {@link #EXTRA_FIELDS_RESERVED_KEYWORDS}.
+   */
+  public ServiceException addExtraField(String key, Boolean value) {
+    return addExtraFieldInternal(key, value);
+  }
+
+  /**
+   * Adds a new extra field.
+   * @return this
+   * @throws IllegalArgumentException if {@code key} is one of the reserved keyword {@link #EXTRA_FIELDS_RESERVED_KEYWORDS}.
+   */
+  public ServiceException addExtraField(String key, Number value) {
+    return addExtraFieldInternal(key, value);
+  }
+
+  private ServiceException addExtraFieldInternal(String key, Object value) {
+    Preconditions.checkNotNull(key);
+    Preconditions.checkArgument(!EXTRA_FIELDS_RESERVED_KEYWORDS.contains(key), "The keyword '%s' is reserved", key);
+    Object prevValue = extraFields.put(key, value);
+    if (prevValue != null) {
+      logger.atFine().log("Replaced extra field %s: %s => %s", key, prevValue, value);
+    }
+    return this;
+  }
+
+  @Nonnull
+  public final Map<String, Object> getExtraFields() {
+    return Collections.unmodifiableMap(extraFields);
   }
 
   public Level getLogLevel() {
