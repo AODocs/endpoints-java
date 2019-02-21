@@ -34,7 +34,9 @@ public class ServiceExceptionTest {
   @Test
   public void testExtraFields() {
     UnauthorizedException ex = new UnauthorizedException("");
-    ex.addExtraField("isAdmin", TRUE).addExtraField("userId", Integer.valueOf(12)).addExtraField("userName", "John Doe");
+    ex.addExtraField("isAdmin", TRUE)
+      .addExtraField("userId", Integer.valueOf(12))
+      .addExtraField("userName", "John Doe");
     Map<String, Object> extraFields = ex.getExtraFields();
     assertThat(extraFields.size()).isEqualTo(3);
     assertThat(extraFields.get("isAdmin")).isEqualTo(TRUE);
@@ -48,7 +50,7 @@ public class ServiceExceptionTest {
   }
 
   @Test
-  public void testExtraFields_valueNull() {
+  public void testExtraFields_valueNull_allowed() {
     UnauthorizedException ex = new UnauthorizedException("");
     ex.addExtraField("isAdmin", (String) null);
     Map<String, Object> extraFields = ex.getExtraFields();
@@ -57,7 +59,7 @@ public class ServiceExceptionTest {
   }
 
   @Test
-  public void testExtraFields_overrideValue() {
+  public void testExtraFields_overrideValue_keepLast() {
     UnauthorizedException ex = new UnauthorizedException("");
     ex.addExtraField("isAdmin", FALSE);
     ex.addExtraField("isAdmin", TRUE);
@@ -67,21 +69,21 @@ public class ServiceExceptionTest {
   }
 
   @Test
-  public void testExtraFields_ReservedDomain() {
-    testExtraFields_ReservedKeyword("domain");
+  public void testExtraFields_ReservedKeyDomain_forbidden() {
+    assertExtraFields_ReservedKeyword_forbidden("domain");
   }
 
   @Test
-  public void testExtraFields_ReservedMessage() {
-    testExtraFields_ReservedKeyword("message");
+  public void testExtraFields_ReservedKeyMessage_forbidden() {
+    assertExtraFields_ReservedKeyword_forbidden("message");
   }
 
   @Test
-  public void testExtraFields_ReservedReason() {
-    testExtraFields_ReservedKeyword("reason");
+  public void testExtraFields_ReservedKeyReason_forbidden() {
+    assertExtraFields_ReservedKeyword_forbidden("reason");
   }
 
-  public void testExtraFields_ReservedKeyword(String keyword) {
+  private void assertExtraFields_ReservedKeyword_forbidden(String keyword) {
     expectedException.expect(IllegalArgumentException.class);
     expectedException.expectMessage("The keyword '" + keyword + "' is reserved");
 

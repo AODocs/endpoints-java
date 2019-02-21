@@ -146,9 +146,9 @@ public class ServiceException extends Exception {
   private ServiceException addExtraFieldInternal(String key, Object value) {
     Preconditions.checkNotNull(key);
     Preconditions.checkArgument(!EXTRA_FIELDS_RESERVED_KEYWORDS.contains(key), "The keyword '%s' is reserved", key);
-    Object prevValue = extraFields.put(key, value);
-    if (prevValue != null) {
-      logger.atFine().log("Replaced extra field %s: %s => %s", key, prevValue, value);
+    Object previousValue = extraFields.put(key, value);
+    if (previousValue != null) {
+      logger.atFine().log("Replaced extra field %s: %s => %s", key, previousValue, value);
     }
     return this;
   }
