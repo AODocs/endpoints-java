@@ -21,8 +21,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 
-import javax.annotation.Nonnull;
-
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.flogger.FluentLogger;
@@ -116,44 +114,56 @@ public class ServiceException extends Exception {
   }
 
   /**
-   * Adds a new extra field.
+   * Associates to this exception an extra field as a key/value pair. If a field with the same
+   * key was previously set, the old value is replaced by the specified value.
    * @return this
-   * @throws IllegalArgumentException if {@code key} is one of the reserved keyword {@link #EXTRA_FIELDS_RESERVED_KEYWORDS}.
+   * @throws NullPointerException if {@code key} is {@code null}.
+   * @throws IllegalArgumentException if {@code key} is one of the reserved keyword
+   * {@link #EXTRA_FIELDS_RESERVED_KEYWORDS}.
    */
-  public ServiceException addExtraField(String key, String value) {
-    return addExtraFieldInternal(key, value);
+  public ServiceException putExtraField(String key, String value) {
+    return putExtraFieldInternal(key, value);
   }
 
   /**
-  /**
-   * Adds a new extra field.
+   * Associates to this exception an extra field as a key/value pair. If a field with the same
+   * key was previously set, the old value is replaced by the specified value.
    * @return this
-   * @throws IllegalArgumentException if {@code key} is one of the reserved keyword {@link #EXTRA_FIELDS_RESERVED_KEYWORDS}.
+   * @throws NullPointerException if {@code key} is {@code null}.
+   * @throws IllegalArgumentException if {@code key} is one of the reserved keyword
+   * {@link #EXTRA_FIELDS_RESERVED_KEYWORDS}.
    */
-  public ServiceException addExtraField(String key, Boolean value) {
-    return addExtraFieldInternal(key, value);
+  public ServiceException putExtraField(String key, Boolean value) {
+    return putExtraFieldInternal(key, value);
   }
 
   /**
-   * Adds a new extra field.
+   * Associates to this exception an extra field as a key/value pair. If a field with the same
+   * key was previously set, the old value is replaced by the specified value.
    * @return this
-   * @throws IllegalArgumentException if {@code key} is one of the reserved keyword {@link #EXTRA_FIELDS_RESERVED_KEYWORDS}.
+   * @throws NullPointerException if {@code key} is {@code null}.
+   * @throws IllegalArgumentException if {@code key} is one of the reserved keyword
+   * {@link #EXTRA_FIELDS_RESERVED_KEYWORDS}.
    */
-  public ServiceException addExtraField(String key, Number value) {
-    return addExtraFieldInternal(key, value);
+  public ServiceException putExtraField(String key, Number value) {
+    return putExtraFieldInternal(key, value);
   }
 
-  private ServiceException addExtraFieldInternal(String key, Object value) {
+  private ServiceException putExtraFieldInternal(String key, Object value) {
     Preconditions.checkNotNull(key);
     Preconditions.checkArgument(!EXTRA_FIELDS_RESERVED_KEYWORDS.contains(key), "The keyword '%s' is reserved", key);
-    Object previousValue = extraFields.put(key, value);
+    final Object previousValue = extraFields.put(key, value);
     if (previousValue != null) {
       logger.atFine().log("Replaced extra field %s: %s => %s", key, previousValue, value);
     }
     return this;
   }
 
-  @Nonnull
+  /**
+   * Gets the extra fields. The extra fields are returned in an unmodifiable map,
+   * each key/value pair is a map entry. The map is empty if no extra field
+   * has been added.
+   */
   public final Map<String, Object> getExtraFields() {
     return Collections.unmodifiableMap(extraFields);
   }

@@ -1,7 +1,6 @@
 package com.google.api.server.spi;
 
 import static com.google.common.truth.Truth.assertThat;
-import static java.lang.Boolean.FALSE;
 import static java.lang.Boolean.TRUE;
 
 import com.google.api.server.spi.response.BadRequestException;
@@ -34,9 +33,9 @@ public class ServiceExceptionTest {
   @Test
   public void testExtraFields() {
     UnauthorizedException ex = new UnauthorizedException("");
-    ex.addExtraField("isAdmin", TRUE)
-      .addExtraField("userId", Integer.valueOf(12))
-      .addExtraField("userName", "John Doe");
+    ex.putExtraField("isAdmin", TRUE)
+      .putExtraField("userId", Integer.valueOf(12))
+      .putExtraField("userName", "John Doe");
     Map<String, Object> extraFields = ex.getExtraFields();
     assertThat(extraFields.size()).isEqualTo(3);
     assertThat(extraFields.get("isAdmin")).isEqualTo(TRUE);
@@ -46,13 +45,13 @@ public class ServiceExceptionTest {
 
   @Test(expected = NullPointerException.class)
   public void testExtraFields_keyNull() {
-    new BadRequestException("").addExtraField(null, "value not null");
+    new BadRequestException("").putExtraField(null, "value not null");
   }
 
   @Test
   public void testExtraFields_valueNull_allowed() {
     UnauthorizedException ex = new UnauthorizedException("");
-    ex.addExtraField("isAdmin", (String) null);
+    ex.putExtraField("isAdmin", (String) null);
     Map<String, Object> extraFields = ex.getExtraFields();
     assertThat(extraFields.size()).isEqualTo(1);
     assertThat(extraFields.get("isAdmin")).isNull();
@@ -61,8 +60,8 @@ public class ServiceExceptionTest {
   @Test
   public void testExtraFields_overrideValue_keepLast() {
     UnauthorizedException ex = new UnauthorizedException("");
-    ex.addExtraField("isAdmin", FALSE);
-    ex.addExtraField("isAdmin", TRUE);
+    ex.putExtraField("isAdmin", "YES");
+    ex.putExtraField("isAdmin", TRUE);
     Map<String, Object> extraFields = ex.getExtraFields();
     assertThat(extraFields.size()).isEqualTo(1);
     assertThat(extraFields.get("isAdmin")).isEqualTo(TRUE);
@@ -87,6 +86,6 @@ public class ServiceExceptionTest {
     expectedException.expect(IllegalArgumentException.class);
     expectedException.expectMessage("The keyword '" + keyword + "' is reserved");
 
-    new ConflictException("Fails", "no extra " + keyword).addExtraField(keyword, "some other " + keyword);
+    new ConflictException("Fails", "no extra " + keyword).putExtraField(keyword, "some other " + keyword);
   }
 }
