@@ -44,7 +44,7 @@ public class ServiceExceptionTest {
   }
 
   @Test(expected = NullPointerException.class)
-  public void testExtraFields_keyNull() {
+  public void testExtraFields_nameNull() {
     new BadRequestException("").putExtraField(null, "value not null");
   }
 
@@ -68,24 +68,24 @@ public class ServiceExceptionTest {
   }
 
   @Test
-  public void testExtraFields_ReservedKeyDomain_forbidden() {
-    assertExtraFields_ReservedKeyword_forbidden("domain");
+  public void testExtraFields_ReservedNameDomain_forbidden() {
+    assertExtraFields_ReservedName_forbidden("domain");
   }
 
   @Test
-  public void testExtraFields_ReservedKeyMessage_forbidden() {
-    assertExtraFields_ReservedKeyword_forbidden("message");
+  public void testExtraFields_ReservedNameMessage_forbidden() {
+    assertExtraFields_ReservedName_forbidden("message");
   }
 
   @Test
-  public void testExtraFields_ReservedKeyReason_forbidden() {
-    assertExtraFields_ReservedKeyword_forbidden("reason");
+  public void testExtraFields_ReservedNameReason_forbidden() {
+    assertExtraFields_ReservedName_forbidden("reason");
   }
 
-  private void assertExtraFields_ReservedKeyword_forbidden(String keyword) {
+  private void assertExtraFields_ReservedName_forbidden(String fieldName) {
     expectedException.expect(IllegalArgumentException.class);
-    expectedException.expectMessage("The keyword '" + keyword + "' is reserved");
+    expectedException.expectMessage("The field name '" + fieldName + "' is reserved");
 
-    new ConflictException("Fails", "no extra " + keyword).putExtraField(keyword, "some other " + keyword);
+    new ConflictException("Fails", "no extra " + fieldName).putExtraField(fieldName, "some other " + fieldName);
   }
 }

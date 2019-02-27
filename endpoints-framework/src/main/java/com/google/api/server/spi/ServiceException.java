@@ -30,9 +30,11 @@ import com.google.common.flogger.FluentLogger;
  * optionally, response headers to return.
  */
 public class ServiceException extends Exception {
+
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
-  /** Reserved keywords, cannot be set as an extra field key. */
-  public static final List<String> EXTRA_FIELDS_RESERVED_KEYWORDS = ImmutableList.of("domain", "message", "reason");
+
+  /** Reserved keywords, cannot be set as an extra field name. */
+  public static final List<String> EXTRA_FIELDS_RESERVED_NAMES = ImmutableList.of("domain", "message", "reason");
 
   protected final int statusCode;
   protected final String reason;
@@ -114,54 +116,57 @@ public class ServiceException extends Exception {
   }
 
   /**
-   * Associates to this exception an extra field as a key/value pair. If a field with the same
-   * key was previously set, the old value is replaced by the specified value.
+   * Associates to this exception an extra field as a field name/value pair. If a field
+   * with the same name was previously set, the old value is replaced by the specified
+   * value.
    * @return this
-   * @throws NullPointerException if {@code key} is {@code null}.
-   * @throws IllegalArgumentException if {@code key} is one of the reserved keyword
-   * {@link #EXTRA_FIELDS_RESERVED_KEYWORDS}.
+   * @throws NullPointerException if {@code fieldName} is {@code null}.
+   * @throws IllegalArgumentException if {@code fieldName} is one of the reserved field
+   *         names {@link #EXTRA_FIELDS_RESERVED_NAMES}.
    */
-  public ServiceException putExtraField(String key, String value) {
-    return putExtraFieldInternal(key, value);
+  public ServiceException putExtraField(String fieldName, String value) {
+    return putExtraFieldInternal(fieldName, value);
   }
 
   /**
-   * Associates to this exception an extra field as a key/value pair. If a field with the same
-   * key was previously set, the old value is replaced by the specified value.
+   * Associates to this exception an extra field as a field name/value pair. If a field
+   * with the same name was previously set, the old value is replaced by the specified
+   * value.
    * @return this
-   * @throws NullPointerException if {@code key} is {@code null}.
-   * @throws IllegalArgumentException if {@code key} is one of the reserved keyword
-   * {@link #EXTRA_FIELDS_RESERVED_KEYWORDS}.
+   * @throws NullPointerException if {@code fieldName} is {@code null}.
+   * @throws IllegalArgumentException if {@code fieldName} is one of the reserved field
+   *         names {@link #EXTRA_FIELDS_RESERVED_NAMES}.
    */
-  public ServiceException putExtraField(String key, Boolean value) {
-    return putExtraFieldInternal(key, value);
+  public ServiceException putExtraField(String fieldName, Boolean value) {
+    return putExtraFieldInternal(fieldName, value);
   }
 
   /**
-   * Associates to this exception an extra field as a key/value pair. If a field with the same
-   * key was previously set, the old value is replaced by the specified value.
+   * Associates to this exception an extra field as a field name/value pair. If a field
+   * with the same name was previously set, the old value is replaced by the specified
+   * value.
    * @return this
-   * @throws NullPointerException if {@code key} is {@code null}.
-   * @throws IllegalArgumentException if {@code key} is one of the reserved keyword
-   * {@link #EXTRA_FIELDS_RESERVED_KEYWORDS}.
+   * @throws NullPointerException if {@code fieldName} is {@code null}.
+   * @throws IllegalArgumentException if {@code fieldName} is one of the reserved field
+   *         names {@link #EXTRA_FIELDS_RESERVED_NAMES}.
    */
-  public ServiceException putExtraField(String key, Number value) {
-    return putExtraFieldInternal(key, value);
+  public ServiceException putExtraField(String fieldName, Number value) {
+    return putExtraFieldInternal(fieldName, value);
   }
 
-  private ServiceException putExtraFieldInternal(String key, Object value) {
-    Preconditions.checkNotNull(key);
-    Preconditions.checkArgument(!EXTRA_FIELDS_RESERVED_KEYWORDS.contains(key), "The keyword '%s' is reserved", key);
-    final Object previousValue = extraFields.put(key, value);
+  private ServiceException putExtraFieldInternal(String fieldName, Object value) {
+    Preconditions.checkNotNull(fieldName);
+    Preconditions.checkArgument(!EXTRA_FIELDS_RESERVED_NAMES.contains(fieldName), "The field name '%s' is reserved", fieldName);
+    final Object previousValue = extraFields.put(fieldName, value);
     if (previousValue != null) {
-      logger.atFine().log("Replaced extra field %s: %s => %s", key, previousValue, value);
+      logger.atFine().log("Replaced extra field %s: %s => %s", fieldName, previousValue, value);
     }
     return this;
   }
 
   /**
    * Gets the extra fields. The extra fields are returned in an unmodifiable map,
-   * each key/value pair is a map entry. The map is empty if no extra field
+   * each field name/value pair is a map entry. The map is empty if no extra field
    * has been added.
    */
   public final Map<String, Object> getExtraFields() {
