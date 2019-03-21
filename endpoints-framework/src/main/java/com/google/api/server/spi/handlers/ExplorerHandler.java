@@ -27,7 +27,8 @@ import javax.servlet.http.HttpServletRequest;
  * A handler which sends a redirect to the API Explorer.
  */
 public class ExplorerHandler implements DispatcherHandler<EndpointsContext> {
-  private static final String EXPLORER_URL = "http://apis-explorer.appspot.com/apis-explorer/";
+  
+  private static final String EXPLORER_URL = "https://developers.google.com/apis-explorer/";
 
   @Override
   public void handle(EndpointsContext context) throws IOException {
