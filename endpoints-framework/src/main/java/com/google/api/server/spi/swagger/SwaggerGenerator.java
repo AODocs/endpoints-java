@@ -15,6 +15,8 @@
  */
 package com.google.api.server.spi.swagger;
 
+import com.google.api.client.googleapis.json.GoogleJsonError;
+import com.google.api.client.googleapis.json.GoogleJsonErrorContainer;
 import com.google.api.server.spi.EndpointMethod;
 import com.google.api.server.spi.Strings;
 import com.google.api.server.spi.TypeLoader;
@@ -177,7 +179,11 @@ public class SwaggerGenerator {
   //using an object property with empty properties is semantically identical
   private static final ObjectProperty FREE_FORM_PROPERTY = new ObjectProperty()
       .properties(Collections.emptyMap());
-
+  //some well-known types should be inlined to avoid polluting model namespace
+  private static final ImmutableSet<String> INLINED_MODEL_NAMES = ImmutableSet.of(
+      GoogleJsonError.class.getSimpleName(), GoogleJsonError.ErrorInfo.class.getSimpleName()
+  );
+  
   private static final Function<ApiConfig, ApiKey> CONFIG_TO_ROOTLESS_KEY =
       new Function<ApiConfig, ApiKey>() {
         @Override
@@ -268,15 +274,16 @@ public class SwaggerGenerator {
     }
     List<Schema> schemas = genCtx.schemata.getAllSchemaForApi(apiKey);
     for (Schema schema : schemas) {
-      if (isNotInlined(schema)) {
+      if (!isInlined(schema)) {
         getOrCreateDefinitionMap(swagger).put(schema.name(), convertToSwaggerSchema(schema));
       }
     }
   }
 
   //enum and map schemas are inlined, shouldn't be in the model definitions
-  private boolean isNotInlined(Schema schema) {
-    return schema.enumValues().isEmpty() && schema.mapValueSchema() == null;
+  private boolean isInlined(Schema schema) {
+    return !schema.enumValues().isEmpty() || schema.mapValueSchema() != null 
+        || INLINED_MODEL_NAMES.contains(schema.name());
   }
 
   private Tag getTag(ApiConfig apiConfig) {
@@ -383,6 +390,22 @@ public class SwaggerGenerator {
       response.setResponseSchema(getSchema(schema));
     }
     operation.response(200, response);
+
+    //add error response model
+    TypeToken<?> errorType = TypeToken.of(GoogleJsonErrorContainer.class);
+    Model errorModel = getSchema(genCtx.schemata.getOrAdd(errorType, apiConfig));
+    //add errors specific to the method
+    Map<Integer, String> errorCodesAndDescriptions = methodConfig.getErrorCodesAndDescriptions();
+    for (Entry<Integer, String> entry : errorCodesAndDescriptions.entrySet()) {
+      operation.response(entry.getKey(), new Response()
+          .description(entry.getValue())
+          .responseSchema(errorModel));
+    }
+    //always add default format for error response
+    operation.defaultResponse(new Response()
+        .description("A failed response")
+        .responseSchema(errorModel));
+    
     writeAuthConfig(swagger, methodConfig, operation);
     if (methodConfig.isApiKeyRequired()) {
       List<Map<String, List<String>>> security = operation.getSecurity();
@@ -491,7 +514,9 @@ public class SwaggerGenerator {
     } else {
       SchemaReference schemaReference = f.schemaReference();
       if (f.type() == FieldType.OBJECT) {
-        if (schemaReference.type().isSubtypeOf(Map.class)) {
+        if (INLINED_MODEL_NAMES.contains(schemaReference.get().name())) {
+          p = inlineObjectProperty(schemaReference);
+        } else if (schemaReference.get().mapValueSchema() != null) {
           p = inlineMapProperty(schemaReference);
         } else {
           String name = schemaReference.get().name();
@@ -513,9 +538,15 @@ public class SwaggerGenerator {
     return p;
   }
 
+  private Property inlineObjectProperty(SchemaReference schemaReference) {
+    Schema schema = schemaReference.get();
+    Map<String, Property> properties = Maps
+        .transformValues(schema.fields(), this::convertToSwaggerProperty);
+    return new ObjectProperty(ImmutableMap.copyOf(properties));
+  }
+
   private MapProperty inlineMapProperty(SchemaReference schemaReference) {
-    Schema schema = schemaReference.repository()
-        .get(schemaReference.type(), schemaReference.apiConfig());
+    Schema schema = schemaReference.get();
     Field mapField = schema.mapValueSchema();
     if (SchemaRepository.isJsonMapSchema(schema)
       || mapField == null) { //map field should not be null for non-JsonMap schema, handling anyway

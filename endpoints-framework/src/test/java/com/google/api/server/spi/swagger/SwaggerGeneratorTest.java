@@ -22,6 +22,7 @@ import static com.google.api.server.spi.config.model.EndpointsFlag.MAP_SCHEMA_SU
 import com.google.api.server.spi.Constant;
 import com.google.api.server.spi.IoUtil;
 import com.google.api.server.spi.ServiceContext;
+import com.google.api.server.spi.ServiceException;
 import com.google.api.server.spi.TypeLoader;
 import com.google.api.server.spi.config.AnnotationBoolean;
 import com.google.api.server.spi.config.Api;
@@ -31,6 +32,9 @@ import com.google.api.server.spi.config.ApiIssuerAudience;
 import com.google.api.server.spi.config.ApiMethod;
 import com.google.api.server.spi.config.annotationreader.ApiConfigAnnotationReader;
 import com.google.api.server.spi.config.model.ApiConfig;
+import com.google.api.server.spi.response.BadRequestException;
+import com.google.api.server.spi.response.ConflictException;
+import com.google.api.server.spi.response.NotFoundException;
 import com.google.api.server.spi.swagger.SwaggerGenerator.SwaggerContext;
 import com.google.api.server.spi.testing.AbsoluteCommonPathEndpoint;
 import com.google.api.server.spi.testing.AbsolutePathEndpoint;
@@ -247,6 +251,14 @@ public class SwaggerGeneratorTest {
     checkSwagger(expected, swagger);
   }
 
+  @Test
+  public void testWriteSwagger_ErrorCodes() throws Exception {
+    ApiConfig config = configLoader.loadConfiguration(ServiceContext.create(), ExceptionEndpoint.class);
+    Swagger swagger = generator.writeSwagger(ImmutableList.of(config), context);
+    Swagger expected = readExpectedAsSwagger("error_codes.swagger");
+    checkSwagger(expected, swagger);
+  }
+
   private Swagger getSwagger(Class<?> serviceClass, SwaggerContext context)
       throws Exception {
     ApiConfig config = configLoader.loadConfiguration(ServiceContext.create(), serviceClass);
@@ -311,4 +323,23 @@ public class SwaggerGeneratorTest {
         })
     public void apiKeyWithAuth() { }
   }
+
+  @Api(name = "exceptions", version = "v1")
+  private static class ExceptionEndpoint {
+    @ApiMethod
+    public void doesNotThrow() { }
+
+    @ApiMethod
+    public void throwsServiceException() throws ServiceException { }
+
+    @ApiMethod
+    public void throwsNotFoundException() throws NotFoundException { }
+
+    @ApiMethod
+    public void throwsMultipleExceptions() throws BadRequestException, ConflictException { }
+
+    @ApiMethod
+    public void throwsUnknownException() throws IllegalStateException { }
+  }
+  
 }
