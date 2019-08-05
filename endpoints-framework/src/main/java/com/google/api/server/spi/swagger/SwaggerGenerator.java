@@ -218,8 +218,11 @@ public class SwaggerGenerator {
         .host(context.hostname)
         .basePath(context.basePath)
         .info(new Info()
-            .title(context.hostname)
-            .version(context.docVersion));
+            .title(context.title != null ? context.title : context.hostname)
+            .description(context.description)
+            .version(context.docVersion)
+            //TODO contact, license, termsOfService could be configured
+        );
     for (ApiKey apiKey : configsByKey.keySet()) {
       writeApi(apiKey, configsByKey.get(apiKey), swagger, genCtx);
     }
@@ -662,6 +665,8 @@ public class SwaggerGenerator {
     private String hostname = "myapi.appspot.com";
     private String basePath = "/_ah/api";
     private String docVersion = "1.0.0";
+    private String title;
+    private String description;
 
     public SwaggerContext setApiRoot(String apiRoot) {
       try {
@@ -696,6 +701,16 @@ public class SwaggerGenerator {
 
     public SwaggerContext setDocVersion(String docVersion) {
       this.docVersion = docVersion;
+      return this;
+    }
+
+    public SwaggerContext setTitle(String title) {
+      this.title = title;
+      return this;
+    }
+
+    public SwaggerContext setDescription(String description) {
+      this.description = description;
       return this;
     }
   }
