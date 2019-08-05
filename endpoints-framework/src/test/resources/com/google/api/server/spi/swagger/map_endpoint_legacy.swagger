@@ -34,8 +34,15 @@
             "schema": {
               "type": "object",
               "additionalProperties": {
-                "type": "object"
+                "type": "object",
+                "properties": {}
               }
+            }
+          },
+          "default": {
+            "description": "A failed response",
+            "schema": {
+              "$ref": "#/definitions/GoogleJsonErrorContainer"
             }
           }
         }
@@ -54,6 +61,12 @@
             "schema": {
               "$ref": "#/definitions/MapContainer"
             }
+          },
+          "default": {
+            "description": "A failed response",
+            "schema": {
+              "$ref": "#/definitions/GoogleJsonErrorContainer"
+            }
           }
         }
       }
@@ -71,8 +84,15 @@
             "schema": {
               "type": "object",
               "additionalProperties": {
-                "type": "object"
+                "type": "object",
+                "properties": {}
               }
+            }
+          },
+          "default": {
+            "description": "A failed response",
+            "schema": {
+              "$ref": "#/definitions/GoogleJsonErrorContainer"
             }
           }
         }
@@ -91,8 +111,15 @@
             "schema": {
               "type": "object",
               "additionalProperties": {
-                "type": "object"
+                "type": "object",
+                "properties": {}
               }
+            }
+          },
+          "default": {
+            "description": "A failed response",
+            "schema": {
+              "$ref": "#/definitions/GoogleJsonErrorContainer"
             }
           }
         }
@@ -111,8 +138,15 @@
             "schema": {
               "type": "object",
               "additionalProperties": {
-                "type": "object"
+                "type": "object",
+                "properties": {}
               }
+            }
+          },
+          "default": {
+            "description": "A failed response",
+            "schema": {
+              "$ref": "#/definitions/GoogleJsonErrorContainer"
             }
           }
         }
@@ -131,8 +165,15 @@
             "schema": {
               "type": "object",
               "additionalProperties": {
-                "type": "object"
+                "type": "object",
+                "properties": {}
               }
+            }
+          },
+          "default": {
+            "description": "A failed response",
+            "schema": {
+              "$ref": "#/definitions/GoogleJsonErrorContainer"
             }
           }
         }
@@ -151,8 +192,15 @@
             "schema": {
               "type": "object",
               "additionalProperties": {
-                "type": "object"
+                "type": "object",
+                "properties": {}
               }
+            }
+          },
+          "default": {
+            "description": "A failed response",
+            "schema": {
+              "$ref": "#/definitions/GoogleJsonErrorContainer"
             }
           }
         }
@@ -171,8 +219,15 @@
             "schema": {
               "type": "object",
               "additionalProperties": {
-                "type": "object"
+                "type": "object",
+                "properties": {}
               }
+            }
+          },
+          "default": {
+            "description": "A failed response",
+            "schema": {
+              "$ref": "#/definitions/GoogleJsonErrorContainer"
             }
           }
         }
@@ -191,8 +246,15 @@
             "schema": {
               "type": "object",
               "additionalProperties": {
-                "type": "object"
+                "type": "object",
+                "properties": {}
               }
+            }
+          },
+          "default": {
+            "description": "A failed response",
+            "schema": {
+              "$ref": "#/definitions/GoogleJsonErrorContainer"
             }
           }
         }
@@ -211,8 +273,15 @@
             "schema": {
               "type": "object",
               "additionalProperties": {
-                "type": "object"
+                "type": "object",
+                "properties": {}
               }
+            }
+          },
+          "default": {
+            "description": "A failed response",
+            "schema": {
+              "$ref": "#/definitions/GoogleJsonErrorContainer"
             }
           }
         }
@@ -231,8 +300,15 @@
             "schema": {
               "type": "object",
               "additionalProperties": {
-                "type": "object"
+                "type": "object",
+                "properties": {}
               }
+            }
+          },
+          "default": {
+            "description": "A failed response",
+            "schema": {
+              "$ref": "#/definitions/GoogleJsonErrorContainer"
             }
           }
         }
@@ -251,8 +327,15 @@
             "schema": {
               "type": "object",
               "additionalProperties": {
-                "type": "object"
+                "type": "object",
+                "properties": {}
               }
+            }
+          },
+          "default": {
+            "description": "A failed response",
+            "schema": {
+              "$ref": "#/definitions/GoogleJsonErrorContainer"
             }
           }
         }
@@ -271,8 +354,15 @@
             "schema": {
               "type": "object",
               "additionalProperties": {
-                "type": "object"
+                "type": "object",
+                "properties": {}
               }
+            }
+          },
+          "default": {
+            "description": "A failed response",
+            "schema": {
+              "$ref": "#/definitions/GoogleJsonErrorContainer"
             }
           }
         }
@@ -291,8 +381,15 @@
             "schema": {
               "type": "object",
               "additionalProperties": {
-                "type": "object"
+                "type": "object",
+                "properties": {}
               }
+            }
+          },
+          "default": {
+            "description": "A failed response",
+            "schema": {
+              "$ref": "#/definitions/GoogleJsonErrorContainer"
             }
           }
         }
@@ -311,8 +408,15 @@
             "schema": {
               "type": "object",
               "additionalProperties": {
-                "type": "object"
+                "type": "object",
+                "properties": {}
               }
+            }
+          },
+          "default": {
+            "description": "A failed response",
+            "schema": {
+              "$ref": "#/definitions/GoogleJsonErrorContainer"
             }
           }
         }
@@ -331,8 +435,15 @@
             "schema": {
               "type": "object",
               "additionalProperties": {
-                "type": "object"
+                "type": "object",
+                "properties": {}
               }
+            }
+          },
+          "default": {
+            "description": "A failed response",
+            "schema": {
+              "$ref": "#/definitions/GoogleJsonErrorContainer"
             }
           }
         }
@@ -351,6 +462,12 @@
             "schema": {
               "$ref": "#/definitions/MapEndpoint"
             }
+          },
+          "default": {
+            "description": "A failed response",
+            "schema": {
+              "$ref": "#/definitions/GoogleJsonErrorContainer"
+            }
           }
         }
       }
@@ -368,8 +485,15 @@
             "schema": {
               "type": "object",
               "additionalProperties": {
-                "type": "object"
+                "type": "object",
+                "properties": {}
               }
+            }
+          },
+          "default": {
+            "description": "A failed response",
+            "schema": {
+              "$ref": "#/definitions/GoogleJsonErrorContainer"
             }
           }
         }
@@ -377,6 +501,46 @@
     }
   },
   "definitions": {
+    "GoogleJsonErrorContainer": {
+      "type": "object",
+      "properties": {
+        "error": {
+          "type": "object",
+          "properties": {
+            "code": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "errors": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "domain": {
+                    "type": "string"
+                  },
+                  "location": {
+                    "type": "string"
+                  },
+                  "locationType": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "reason": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "message": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
     "JsonMap": {
       "type": "object"
     },
@@ -384,11 +548,7 @@
       "type": "object",
       "properties": {
         "stringMap": {
-          "type": "object",
-          "description": "A map of string values",
-          "additionalProperties": {
-            "type": "object"
-          }
+          "$ref": "#/definitions/JsonMap"
         }
       }
     },
@@ -396,70 +556,37 @@
       "type": "object",
       "properties": {
         "bazMap": {
-          "type": "object",
-          "additionalProperties": {
-            "type": "object"
-          }
+          "$ref": "#/definitions/JsonMap"
         },
         "booleanKeyMap": {
-          "type": "object",
-          "additionalProperties": {
-            "type": "object"
-          }
+          "$ref": "#/definitions/JsonMap"
         },
         "dateKeyMap": {
-          "type": "object",
-          "additionalProperties": {
-            "type": "object"
-          }
+          "$ref": "#/definitions/JsonMap"
         },
         "dateTimeKeyMap": {
-          "type": "object",
-          "additionalProperties": {
-            "type": "object"
-          }
+          "$ref": "#/definitions/JsonMap"
         },
         "enumKeyMap": {
-          "type": "object",
-          "additionalProperties": {
-            "type": "object"
-          }
+          "$ref": "#/definitions/JsonMap"
         },
         "floatKeyMap": {
-          "type": "object",
-          "additionalProperties": {
-            "type": "object"
-          }
+          "$ref": "#/definitions/JsonMap"
         },
         "fooMap": {
-          "type": "object",
-          "additionalProperties": {
-            "type": "object"
-          }
+          "$ref": "#/definitions/JsonMap"
         },
         "fooMapMap": {
-          "type": "object",
-          "additionalProperties": {
-            "type": "object"
-          }
+          "$ref": "#/definitions/JsonMap"
         },
         "intKeyMap": {
-          "type": "object",
-          "additionalProperties": {
-            "type": "object"
-          }
+          "$ref": "#/definitions/JsonMap"
         },
         "intMap": {
-          "type": "object",
-          "additionalProperties": {
-            "type": "object"
-          }
+          "$ref": "#/definitions/JsonMap"
         },
         "longKeyMap": {
-          "type": "object",
-          "additionalProperties": {
-            "type": "object"
-          }
+          "$ref": "#/definitions/JsonMap"
         },
         "mapOfStrings": {
           "$ref": "#/definitions/MapContainer"
@@ -468,34 +595,19 @@
           "$ref": "#/definitions/MapEndpoint"
         },
         "mapSubclass": {
-          "type": "object",
-          "additionalProperties": {
-            "type": "object"
-          }
+          "$ref": "#/definitions/JsonMap"
         },
         "stringArrayMap": {
-          "type": "object",
-          "additionalProperties": {
-            "type": "object"
-          }
+          "$ref": "#/definitions/JsonMap"
         },
         "stringCollectionMap": {
-          "type": "object",
-          "additionalProperties": {
-            "type": "object"
-          }
+          "$ref": "#/definitions/JsonMap"
         },
         "stringMap": {
-          "type": "object",
-          "additionalProperties": {
-            "type": "object"
-          }
+          "$ref": "#/definitions/JsonMap"
         },
         "stringValueMap": {
-          "type": "object",
-          "additionalProperties": {
-            "type": "object"
-          }
+          "$ref": "#/definitions/JsonMap"
         }
       }
     }

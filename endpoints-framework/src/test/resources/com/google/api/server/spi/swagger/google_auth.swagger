@@ -31,6 +31,12 @@
         "responses": {
           "200": {
             "description": "A successful response"
+          },
+          "default": {
+            "description": "A failed response",
+            "schema": {
+              "$ref": "#/definitions/GoogleJsonErrorContainer"
+            }
           }
         },
         "security": [
@@ -50,6 +56,12 @@
         "responses": {
           "200": {
             "description": "A successful response"
+          },
+          "default": {
+            "description": "A failed response",
+            "schema": {
+              "$ref": "#/definitions/GoogleJsonErrorContainer"
+            }
           }
         },
         "security": [
@@ -71,6 +83,12 @@
         "responses": {
           "200": {
             "description": "A successful response"
+          },
+          "default": {
+            "description": "A failed response",
+            "schema": {
+              "$ref": "#/definitions/GoogleJsonErrorContainer"
+            }
           }
         },
         "security": [
@@ -105,6 +123,48 @@
       "x-google-issuer": "accounts.google.com",
       "x-google-jwks_uri": "https://www.googleapis.com/oauth2/v1/certs",
       "x-google-audiences": "googleaud"
+    }
+  },
+  "definitions": {
+    "GoogleJsonErrorContainer": {
+      "type": "object",
+      "properties": {
+        "error": {
+          "type": "object",
+          "properties": {
+            "code": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "errors": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "domain": {
+                    "type": "string"
+                  },
+                  "location": {
+                    "type": "string"
+                  },
+                  "locationType": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "reason": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "message": {
+              "type": "string"
+            }
+          }
+        }
+      }
     }
   }
 }

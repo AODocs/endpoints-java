@@ -29,7 +29,7 @@
         "operationId": "ExceptionsV1DoesNotThrow",
         "parameters": [],
         "responses": {
-          "204": {
+          "200": {
             "description": "A successful response"
           },
           "default": {
@@ -49,7 +49,7 @@
         "operationId": "ExceptionsV1ThrowsMultipleExceptions",
         "parameters": [],
         "responses": {
-          "204": {
+          "200": {
             "description": "A successful response"
           },
           "400": {
@@ -81,7 +81,7 @@
         "operationId": "ExceptionsV1ThrowsNotFoundException",
         "parameters": [],
         "responses": {
-          "204": {
+          "200": {
             "description": "A successful response"
           },
           "404": {
@@ -107,7 +107,7 @@
         "operationId": "ExceptionsV1ThrowsServiceException",
         "parameters": [],
         "responses": {
-          "204": {
+          "200": {
             "description": "A successful response"
           },
           "default": {
@@ -127,7 +127,7 @@
         "operationId": "ExceptionsV1ThrowsUnknownException",
         "parameters": [],
         "responses": {
-          "204": {
+          "200": {
             "description": "A successful response"
           },
           "default": {
@@ -141,26 +141,6 @@
     }
   },
   "definitions": {
-    "ErrorInfo": {
-      "type": "object",
-      "properties": {
-        "domain": {
-          "type": "string"
-        },
-        "location": {
-          "type": "string"
-        },
-        "locationType": {
-          "type": "string"
-        },
-        "message": {
-          "type": "string"
-        },
-        "reason": {
-          "type": "string"
-        }
-      }
-    },
     "GoogleJsonErrorContainer": {
       "type": "object",
       "properties": {
@@ -174,7 +154,24 @@
             "errors": {
               "type": "array",
               "items": {
-                "$ref": "#/definitions/ErrorInfo"
+                "type": "object",
+                "properties": {
+                  "domain": {
+                    "type": "string"
+                  },
+                  "location": {
+                    "type": "string"
+                  },
+                  "locationType": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "reason": {
+                    "type": "string"
+                  }
+                }
               }
             },
             "message": {

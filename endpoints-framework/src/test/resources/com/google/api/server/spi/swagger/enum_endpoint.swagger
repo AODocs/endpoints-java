@@ -45,6 +45,12 @@
             "schema": {
               "$ref": "#/definitions/EnumValue"
             }
+          },
+          "default": {
+            "description": "A failed response",
+            "schema": {
+              "$ref": "#/definitions/GoogleJsonErrorContainer"
+            }
           }
         }
       }
@@ -60,6 +66,46 @@
             "VALUE1",
             "value_2"
           ]
+        }
+      }
+    },
+    "GoogleJsonErrorContainer": {
+      "type": "object",
+      "properties": {
+        "error": {
+          "type": "object",
+          "properties": {
+            "code": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "errors": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "domain": {
+                    "type": "string"
+                  },
+                  "location": {
+                    "type": "string"
+                  },
+                  "locationType": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "reason": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "message": {
+              "type": "string"
+            }
+          }
         }
       }
     }

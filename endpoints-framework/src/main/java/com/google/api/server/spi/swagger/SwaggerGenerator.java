@@ -45,12 +45,15 @@ import com.google.common.base.Converter;
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.collect.FluentIterable;
+import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSortedMap;
 import com.google.common.collect.ImmutableSortedMap.Builder;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Multimap;
 import com.google.common.reflect.TypeToken;
 
 import java.lang.reflect.Type;
@@ -83,9 +86,10 @@ import io.swagger.models.auth.OAuth2Definition;
 import io.swagger.models.auth.SecuritySchemeDefinition;
 import io.swagger.models.parameters.AbstractSerializableParameter;
 import io.swagger.models.parameters.BodyParameter;
+import io.swagger.models.parameters.Parameter;
 import io.swagger.models.parameters.PathParameter;
 import io.swagger.models.parameters.QueryParameter;
-import io.swagger.models.parameters.SerializableParameter;
+import io.swagger.models.parameters.RefParameter;
 import io.swagger.models.properties.ArrayProperty;
 import io.swagger.models.properties.BooleanProperty;
 import io.swagger.models.properties.ByteArrayProperty;
@@ -232,8 +236,72 @@ public class SwaggerGenerator {
       builder.put(pathEntry);
     }
     swagger.paths(builder.build());
+    combineCommonParameters(swagger, context);
     writeQuotaDefinitions(swagger, genCtx);
     return swagger;
+  }
+
+  private void combineCommonParameters(Swagger swagger, SwaggerContext context) {
+    if (!context.extractCommonParametersAsRefs && !context.combineCommonParametersInSamePath) {
+      return;
+    }
+    
+    Multimap<String, Parameter> paramNameCounter = HashMultimap.create();
+    Multimap<Parameter, Path> specLevelParameters = HashMultimap.create();
+    Map<Path, Multimap<Parameter, Operation>> pathLevelParameters = Maps.newHashMap();
+    
+    //collect parameters on all operations
+    swagger.getPaths().values().forEach(path -> {
+      Multimap<Parameter, Operation> parameters = HashMultimap.create();
+      path.getOperations().forEach(operation -> {
+        operation.getParameters().forEach(parameter -> {
+          paramNameCounter.put(parameter.getName(), parameter);
+          specLevelParameters.put(parameter, path);
+          parameters.put(parameter, operation);
+        });
+        pathLevelParameters.put(path, parameters);
+      });
+    });
+    
+    if (context.extractCommonParametersAsRefs) {
+      //combine common spec-level params (only if more than one path)
+      specLevelParameters.asMap().forEach((parameter, paths) -> {
+        //parameters used in more than one path are replaced by refs, only if they have unique names
+        if (paths.size() > 1 && paramNameCounter.get(parameter.getName()).size() == 1) {
+          swagger.addParameter(parameter.getName(), parameter);
+          swagger.getPaths().values().forEach(path -> path.getOperations().forEach(operation -> {
+            List<Parameter> opParameters = operation.getParameters();
+            if (opParameters.contains(parameter)) {
+              opParameters.add(new RefParameter(parameter.getName())
+                  .asDefault(parameter.getName()));
+              opParameters.remove(parameter);
+            }
+          }));
+          pathLevelParameters.values().forEach(pathParameters -> pathParameters.removeAll(parameter));
+        }
+      });
+    }
+    
+    if (context.combineCommonParametersInSamePath) {
+      //combine remaining common path-level params
+      pathLevelParameters.forEach((path, parameterMap) -> {
+        parameterMap.asMap().forEach((parameter, operations) -> {
+          //if parameter is used in all operations, replace it
+          if (operations.size() == path.getOperations().size()) {
+            path.addParameter(parameter);
+            operations.forEach(operation -> operation.getParameters().remove(parameter));
+          }
+        });
+        //nullify empty parameters at path level
+        //TODO deserialization recreates an empty list on null, but could save size
+        /*path.getOperations().forEach(operation -> {
+          List<Parameter> parameters = operation.getParameters();
+          if (parameters != null && parameters.isEmpty()) {
+            operation.setParameters(null);
+          }
+        });*/
+      });
+    }
   }
 
   private void writeQuotaDefinitions(Swagger swagger, GenerationContext genCtx) {
@@ -659,7 +727,6 @@ public class SwaggerGenerator {
     return issuerPlusHash;
   }
 
-  //TODO add title and description
   public static class SwaggerContext {
     private Scheme scheme = Scheme.HTTPS;
     private String hostname = "myapi.appspot.com";
@@ -667,6 +734,8 @@ public class SwaggerGenerator {
     private String docVersion = "1.0.0";
     private String title;
     private String description;
+    private boolean extractCommonParametersAsRefs;
+    private boolean combineCommonParametersInSamePath;
 
     public SwaggerContext setApiRoot(String apiRoot) {
       try {
@@ -711,6 +780,16 @@ public class SwaggerGenerator {
 
     public SwaggerContext setDescription(String description) {
       this.description = description;
+      return this;
+    }
+
+    public SwaggerContext setExtractCommonParametersAsRefs(boolean extractCommonParametersAsRefs) {
+      this.extractCommonParametersAsRefs = extractCommonParametersAsRefs;
+      return this;
+    }
+
+    public SwaggerContext setCombineCommonParametersInSamePath(boolean combineCommonParametersInSamePath) {
+      this.combineCommonParametersInSamePath = combineCommonParametersInSamePath;
       return this;
     }
   }

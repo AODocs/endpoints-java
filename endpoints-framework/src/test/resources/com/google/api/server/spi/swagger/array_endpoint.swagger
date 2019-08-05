@@ -34,6 +34,12 @@
             "schema": {
               "$ref": "#/definitions/ArrayEndpoint"
             }
+          },
+          "default": {
+            "description": "A failed response",
+            "schema": {
+              "$ref": "#/definitions/GoogleJsonErrorContainer"
+            }
           }
         }
       }
@@ -50,6 +56,12 @@
             "description": "A successful response",
             "schema": {
               "$ref": "#/definitions/Baz"
+            }
+          },
+          "default": {
+            "description": "A failed response",
+            "schema": {
+              "$ref": "#/definitions/GoogleJsonErrorContainer"
             }
           }
         }
@@ -68,6 +80,12 @@
             "schema": {
               "$ref": "#/definitions/CollectionResponse_Foo"
             }
+          },
+          "default": {
+            "description": "A failed response",
+            "schema": {
+              "$ref": "#/definitions/GoogleJsonErrorContainer"
+            }
           }
         }
       }
@@ -84,6 +102,12 @@
             "description": "A successful response",
             "schema": {
               "$ref": "#/definitions/FooCollection"
+            }
+          },
+          "default": {
+            "description": "A failed response",
+            "schema": {
+              "$ref": "#/definitions/GoogleJsonErrorContainer"
             }
           }
         }
@@ -102,6 +126,12 @@
             "schema": {
               "$ref": "#/definitions/FooCollectionCollection"
             }
+          },
+          "default": {
+            "description": "A failed response",
+            "schema": {
+              "$ref": "#/definitions/GoogleJsonErrorContainer"
+            }
           }
         }
       }
@@ -118,6 +148,12 @@
             "description": "A successful response",
             "schema": {
               "$ref": "#/definitions/FooCollectionCollection"
+            }
+          },
+          "default": {
+            "description": "A failed response",
+            "schema": {
+              "$ref": "#/definitions/GoogleJsonErrorContainer"
             }
           }
         }
@@ -136,6 +172,12 @@
             "schema": {
               "$ref": "#/definitions/CollectionResponse_FooCollection"
             }
+          },
+          "default": {
+            "description": "A failed response",
+            "schema": {
+              "$ref": "#/definitions/GoogleJsonErrorContainer"
+            }
           }
         }
       }
@@ -152,6 +194,12 @@
             "description": "A successful response",
             "schema": {
               "$ref": "#/definitions/CollectionResponse_FooCollectionCollection"
+            }
+          },
+          "default": {
+            "description": "A failed response",
+            "schema": {
+              "$ref": "#/definitions/GoogleJsonErrorContainer"
             }
           }
         }
@@ -170,6 +218,12 @@
             "schema": {
               "$ref": "#/definitions/FooCollection"
             }
+          },
+          "default": {
+            "description": "A failed response",
+            "schema": {
+              "$ref": "#/definitions/GoogleJsonErrorContainer"
+            }
           }
         }
       }
@@ -186,6 +240,12 @@
             "description": "A successful response",
             "schema": {
               "$ref": "#/definitions/CollectionResponse_Integer"
+            }
+          },
+          "default": {
+            "description": "A failed response",
+            "schema": {
+              "$ref": "#/definitions/GoogleJsonErrorContainer"
             }
           }
         }
@@ -204,6 +264,12 @@
             "schema": {
               "$ref": "#/definitions/ListContainer"
             }
+          },
+          "default": {
+            "description": "A failed response",
+            "schema": {
+              "$ref": "#/definitions/GoogleJsonErrorContainer"
+            }
           }
         }
       }
@@ -221,6 +287,12 @@
             "schema": {
               "$ref": "#/definitions/IntegerCollection"
             }
+          },
+          "default": {
+            "description": "A failed response",
+            "schema": {
+              "$ref": "#/definitions/GoogleJsonErrorContainer"
+            }
           }
         }
       }
@@ -237,6 +309,12 @@
             "description": "A successful response",
             "schema": {
               "$ref": "#/definitions/IntegerCollection"
+            }
+          },
+          "default": {
+            "description": "A failed response",
+            "schema": {
+              "$ref": "#/definitions/GoogleJsonErrorContainer"
             }
           }
         }
@@ -273,6 +351,12 @@
         "responses": {
           "200": {
             "description": "A successful response"
+          },
+          "default": {
+            "description": "A failed response",
+            "schema": {
+              "$ref": "#/definitions/GoogleJsonErrorContainer"
+            }
           }
         }
       }
@@ -312,6 +396,12 @@
         "responses": {
           "200": {
             "description": "A successful response"
+          },
+          "default": {
+            "description": "A failed response",
+            "schema": {
+              "$ref": "#/definitions/GoogleJsonErrorContainer"
+            }
           }
         }
       }
@@ -349,6 +439,12 @@
         "responses": {
           "200": {
             "description": "A successful response"
+          },
+          "default": {
+            "description": "A failed response",
+            "schema": {
+              "$ref": "#/definitions/GoogleJsonErrorContainer"
+            }
           }
         }
       }
@@ -378,6 +474,12 @@
         "responses": {
           "200": {
             "description": "A successful response"
+          },
+          "default": {
+            "description": "A failed response",
+            "schema": {
+              "$ref": "#/definitions/GoogleJsonErrorContainer"
+            }
           }
         }
       }
@@ -415,6 +517,12 @@
         "responses": {
           "200": {
             "description": "A successful response"
+          },
+          "default": {
+            "description": "A failed response",
+            "schema": {
+              "$ref": "#/definitions/GoogleJsonErrorContainer"
+            }
           }
         }
       }
@@ -452,6 +560,12 @@
         "responses": {
           "200": {
             "description": "A successful response"
+          },
+          "default": {
+            "description": "A failed response",
+            "schema": {
+              "$ref": "#/definitions/GoogleJsonErrorContainer"
+            }
           }
         }
       }
@@ -489,6 +603,12 @@
         "responses": {
           "200": {
             "description": "A successful response"
+          },
+          "default": {
+            "description": "A failed response",
+            "schema": {
+              "$ref": "#/definitions/GoogleJsonErrorContainer"
+            }
           }
         }
       }
@@ -514,6 +634,12 @@
         "responses": {
           "200": {
             "description": "A successful response"
+          },
+          "default": {
+            "description": "A failed response",
+            "schema": {
+              "$ref": "#/definitions/GoogleJsonErrorContainer"
+            }
           }
         }
       }
@@ -712,6 +838,46 @@
             "type": "array",
             "items": {
               "$ref": "#/definitions/Foo"
+            }
+          }
+        }
+      }
+    },
+    "GoogleJsonErrorContainer": {
+      "type": "object",
+      "properties": {
+        "error": {
+          "type": "object",
+          "properties": {
+            "code": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "errors": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "domain": {
+                    "type": "string"
+                  },
+                  "location": {
+                    "type": "string"
+                  },
+                  "locationType": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "reason": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "message": {
+              "type": "string"
             }
           }
         }

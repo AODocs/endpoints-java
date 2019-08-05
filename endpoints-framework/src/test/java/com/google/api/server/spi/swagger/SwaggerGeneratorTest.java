@@ -40,6 +40,7 @@ import com.google.api.server.spi.testing.AbsoluteCommonPathEndpoint;
 import com.google.api.server.spi.testing.AbsolutePathEndpoint;
 import com.google.api.server.spi.testing.ArrayEndpoint;
 import com.google.api.server.spi.testing.EnumEndpoint;
+import com.google.api.server.spi.testing.FooCommonParamsEndpoint;
 import com.google.api.server.spi.testing.FooDescriptionEndpoint;
 import com.google.api.server.spi.testing.FooEndpoint;
 import com.google.api.server.spi.testing.LimitMetricsEndpoint;
@@ -88,6 +89,37 @@ public class SwaggerGeneratorTest {
     ApiConfig config = configLoader.loadConfiguration(ServiceContext.create(), FooEndpoint.class);
     Swagger swagger = generator.writeSwagger(ImmutableList.of(config), context);
     Swagger expected = readExpectedAsSwagger("foo_endpoint.swagger");
+    checkSwagger(expected, swagger);
+  }
+  
+  @Test
+  public void testWriteSwagger_FooEndpointParameterCombineParamSamePath() throws Exception {
+    ApiConfig config = configLoader.loadConfiguration(ServiceContext.create(), 
+        FooCommonParamsEndpoint.class);
+    Swagger swagger = generator.writeSwagger(ImmutableList.of(config), context
+      .setCombineCommonParametersInSamePath(true));
+    Swagger expected = readExpectedAsSwagger("foo_endpoint_combine_params_same_path.swagger");
+    checkSwagger(expected, swagger);
+  }
+
+  @Test
+  public void testWriteSwagger_FooEndpointParameterExtractParamRef() throws Exception {
+    ApiConfig config = configLoader.loadConfiguration(ServiceContext.create(), 
+        FooCommonParamsEndpoint.class);
+    Swagger swagger = generator.writeSwagger(ImmutableList.of(config), context
+        .setExtractCommonParametersAsRefs(true));
+    Swagger expected = readExpectedAsSwagger("foo_endpoint_extract_param_refs.swagger");
+    checkSwagger(expected, swagger);
+  }
+
+  @Test
+  public void testWriteSwagger_FooEndpointParameterCombineAllParam() throws Exception {
+    ApiConfig config = configLoader.loadConfiguration(ServiceContext.create(), 
+        FooCommonParamsEndpoint.class);
+    Swagger swagger = generator.writeSwagger(ImmutableList.of(config), context
+        .setExtractCommonParametersAsRefs(true)
+        .setCombineCommonParametersInSamePath(true));
+    Swagger expected = readExpectedAsSwagger("foo_endpoint_combine_all_params.swagger");
     checkSwagger(expected, swagger);
   }
 

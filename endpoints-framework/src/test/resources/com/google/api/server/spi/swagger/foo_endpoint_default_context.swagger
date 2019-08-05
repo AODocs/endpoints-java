@@ -47,6 +47,12 @@
             "schema": {
               "$ref": "#/definitions/CollectionResponse_Foo"
             }
+          },
+          "default": {
+            "description": "A failed response",
+            "schema": {
+              "$ref": "#/definitions/GoogleJsonErrorContainer"
+            }
           }
         },
         "security": [
@@ -73,6 +79,12 @@
             "description": "A successful response",
             "schema": {
               "$ref": "#/definitions/CollectionResponse_Foo"
+            }
+          },
+          "default": {
+            "description": "A failed response",
+            "schema": {
+              "$ref": "#/definitions/GoogleJsonErrorContainer"
             }
           }
         },
@@ -111,6 +123,12 @@
             "description": "A successful response",
             "schema": {
               "$ref": "#/definitions/Foo"
+            }
+          },
+          "default": {
+            "description": "A failed response",
+            "schema": {
+              "$ref": "#/definitions/GoogleJsonErrorContainer"
             }
           }
         },
@@ -156,6 +174,12 @@
             "schema": {
               "$ref": "#/definitions/Foo"
             }
+          },
+          "default": {
+            "description": "A failed response",
+            "schema": {
+              "$ref": "#/definitions/GoogleJsonErrorContainer"
+            }
           }
         },
         "security": [
@@ -200,6 +224,12 @@
             "schema": {
               "$ref": "#/definitions/Foo"
             }
+          },
+          "default": {
+            "description": "A failed response",
+            "schema": {
+              "$ref": "#/definitions/GoogleJsonErrorContainer"
+            }
           }
         },
         "security": [
@@ -235,6 +265,12 @@
             "description": "A successful response",
             "schema": {
               "$ref": "#/definitions/Foo"
+            }
+          },
+          "default": {
+            "description": "A failed response",
+            "schema": {
+              "$ref": "#/definitions/GoogleJsonErrorContainer"
             }
           }
         },
@@ -295,6 +331,46 @@
         "value": {
           "type": "integer",
           "format": "int32"
+        }
+      }
+    },
+    "GoogleJsonErrorContainer": {
+      "type": "object",
+      "properties": {
+        "error": {
+          "type": "object",
+          "properties": {
+            "code": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "errors": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "domain": {
+                    "type": "string"
+                  },
+                  "location": {
+                    "type": "string"
+                  },
+                  "locationType": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "reason": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "message": {
+              "type": "string"
+            }
+          }
         }
       }
     }

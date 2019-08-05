@@ -9,7 +9,10 @@
   "tags": [
     {
       "name": "foo:v1",
-      "description": "Just Foo Things"
+      "description": "Just Foo Things",
+      "externalDocs": {
+        "url": "https://example.com"
+      }
     }
   ],
   "schemes": [
@@ -22,6 +25,45 @@
     "application/json"
   ],
   "paths": {
+    "/foo/v1/fooos": {
+      "get": {
+        "tags": [
+          "foo:v1"
+        ],
+        "operationId": "FooV1ListFooos",
+        "parameters": [
+          {
+            "$ref": "#/parameters/n"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A successful response",
+            "schema": {
+              "$ref": "#/definitions/CollectionResponse_Foo"
+            }
+          },
+          "default": {
+            "description": "A failed response",
+            "schema": {
+              "$ref": "#/definitions/GoogleJsonErrorContainer"
+            }
+          }
+        },
+        "security": [
+          {
+            "google_id_token-3a26ea04": [
+              "https://www.googleapis.com/auth/userinfo.email"
+            ]
+          },
+          {
+            "google_id_token_legacy-3a26ea04": [
+              "https://www.googleapis.com/auth/userinfo.email"
+            ]
+          }
+        ]
+      }
+    },
     "/foo/v1/foos": {
       "get": {
         "tags": [
@@ -31,29 +73,14 @@
         "operationId": "FooV1ListFoos",
         "parameters": [
           {
-            "name": "n",
-            "in": "query",
-            "required": true,
-            "type": "integer",
-            "format": "int32"
-          },
-          {
-            "name": "enum",
-            "in": "query",
-            "description": "enum desc",
-            "required": false,
-            "type": "string",
-            "enum": [
-              "VALUE1",
-              "VALUE2"
-            ]
+            "$ref": "#/parameters/n"
           }
         ],
         "responses": {
           "200": {
             "description": "A successful response",
             "schema": {
-              "$ref": "#/definitions/CollectionResponse_FooDescription"
+              "$ref": "#/definitions/CollectionResponse_Foo"
             }
           },
           "default": {
@@ -86,7 +113,7 @@
           "200": {
             "description": "A successful response",
             "schema": {
-              "$ref": "#/definitions/CollectionResponse_FooDescription"
+              "$ref": "#/definitions/CollectionResponse_Foo"
             }
           },
           "default": {
@@ -130,7 +157,7 @@
           "200": {
             "description": "A successful response",
             "schema": {
-              "$ref": "#/definitions/FooDescription"
+              "$ref": "#/definitions/Foo"
             }
           },
           "default": {
@@ -172,7 +199,7 @@
             "name": "body",
             "required": false,
             "schema": {
-              "$ref": "#/definitions/FooDescription"
+              "$ref": "#/definitions/Foo"
             }
           }
         ],
@@ -180,7 +207,7 @@
           "200": {
             "description": "A successful response",
             "schema": {
-              "$ref": "#/definitions/FooDescription"
+              "$ref": "#/definitions/Foo"
             }
           },
           "default": {
@@ -222,7 +249,7 @@
             "name": "body",
             "required": false,
             "schema": {
-              "$ref": "#/definitions/FooDescription"
+              "$ref": "#/definitions/Foo"
             }
           }
         ],
@@ -230,7 +257,7 @@
           "200": {
             "description": "A successful response",
             "schema": {
-              "$ref": "#/definitions/FooDescription"
+              "$ref": "#/definitions/Foo"
             }
           },
           "default": {
@@ -272,7 +299,7 @@
           "200": {
             "description": "A successful response",
             "schema": {
-              "$ref": "#/definitions/FooDescription"
+              "$ref": "#/definitions/Foo"
             }
           },
           "default": {
@@ -316,13 +343,13 @@
     }
   },
   "definitions": {
-    "CollectionResponse_FooDescription": {
+    "CollectionResponse_Foo": {
       "type": "object",
       "properties": {
         "items": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/FooDescription"
+            "$ref": "#/definitions/Foo"
           }
         },
         "nextPageToken": {
@@ -330,25 +357,15 @@
         }
       }
     },
-    "FooDescription": {
+    "Foo": {
       "type": "object",
       "properties": {
-        "choice": {
-          "type": "string",
-          "description": "description of choice",
-          "enum": [
-            "VALUE1",
-            "VALUE2"
-          ]
-        },
         "name": {
-          "type": "string",
-          "description": "description of name"
+          "type": "string"
         },
         "value": {
           "type": "integer",
-          "format": "int32",
-          "description": "description of value"
+          "format": "int32"
         }
       }
     },
@@ -391,6 +408,15 @@
           }
         }
       }
+    }
+  },
+  "parameters": {
+    "n": {
+      "name": "n",
+      "in": "query",
+      "required": true,
+      "type": "integer",
+      "format": "int32"
     }
   }
 }
