@@ -1,9 +1,8 @@
-dist: bionic
 language: java
 jdk:
   - openjdk8
 before_install:
-  - sudo apt-get -y install python2.7 python-pip
+  - sudo apt-get -y install python2 python-pip
   - python2 -m pip install --user google-apis-client-generator
 install:
   - ./gradlew classes testClasses
