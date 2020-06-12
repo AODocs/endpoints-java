@@ -159,7 +159,7 @@ public class ApiMethodConfig {
   }
 
   /** Value of the response status when not set in the definition of the method. */
-  public static final int RESPONSE_STATUS_UNSET = -1;
+  public static final int RESPONSE_STATUS_UNSPECIFIED = -1;
 
   private final String endpointMethodName;
 
@@ -256,7 +256,7 @@ public class ApiMethodConfig {
     ignored = false;
     apiKeyRequired = null;
     returnType = endpointMethod.getReturnType();
-    responseStatus = RESPONSE_STATUS_UNSET;
+    responseStatus = RESPONSE_STATUS_UNSPECIFIED;
     exceptionTypes = endpointMethod.getMethod().getExceptionTypes();
     metricCosts = ImmutableList.of();
   }
@@ -547,7 +547,7 @@ public class ApiMethodConfig {
   }
 
   public int getEffectiveResponseStatus() {
-    return responseStatus == RESPONSE_STATUS_UNSET ? (hasResourceInResponse() ? SC_OK : SC_NO_CONTENT) : responseStatus;
+    return responseStatus == RESPONSE_STATUS_UNSPECIFIED ? (hasResourceInResponse() ? SC_OK : SC_NO_CONTENT) : responseStatus;
   }
 
   public class ErrorResponse {

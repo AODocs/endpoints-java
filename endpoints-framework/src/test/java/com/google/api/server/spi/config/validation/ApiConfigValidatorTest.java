@@ -505,7 +505,7 @@ public class ApiConfigValidatorTest {
   }
 
   @Test
-  public void testApiMethodConfigWithApiMethodResponseStatusInformal() throws Exception {
+  public void testApiMethodConfigWithApiMethodResponseStatus1xx() throws Exception {
     @Api(name = "testApi", version = "v1", resource = "bar")
     final class Test {
       @ApiMethod(responseStatus = 103)
@@ -524,7 +524,7 @@ public class ApiConfigValidatorTest {
   }
 
   @Test
-  public void testApiMethodConfigWithApiMethodResponseStatusRedirection() throws Exception {
+  public void testApiMethodConfigWithApiMethodResponseStatus3xx() throws Exception {
     @Api(name = "testApi", version = "v1", resource = "bar")
     final class Test {
       @ApiMethod(responseStatus = 300)

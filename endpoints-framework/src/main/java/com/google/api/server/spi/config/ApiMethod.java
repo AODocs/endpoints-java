@@ -15,6 +15,8 @@
  */
 package com.google.api.server.spi.config;
 
+import static com.google.api.server.spi.config.model.ApiMethodConfig.RESPONSE_STATUS_UNSPECIFIED;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -70,7 +72,7 @@ public @interface ApiMethod {
   /**
    * The response status on success. If not set, the value is 200 or 204 if there is no content returned.
    */
-  int responseStatus() default -1;
+  int responseStatus() default RESPONSE_STATUS_UNSPECIFIED;
 
   /**
    * Set frontend auth level.

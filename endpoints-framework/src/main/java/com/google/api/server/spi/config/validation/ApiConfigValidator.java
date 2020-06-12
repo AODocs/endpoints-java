@@ -252,7 +252,7 @@ public class ApiConfigValidator {
     }
 
     int responseStatus = config.getResponseStatus();
-    if (responseStatus != ApiMethodConfig.RESPONSE_STATUS_UNSET && (responseStatus < 200 || responseStatus > 299)) {
+    if (responseStatus != ApiMethodConfig.RESPONSE_STATUS_UNSPECIFIED && (responseStatus < 200 || responseStatus > 299)) {
       throw new InvalidResponseStatusException(config, responseStatus);
     }
   }
