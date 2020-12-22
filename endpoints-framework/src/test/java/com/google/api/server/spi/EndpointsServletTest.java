@@ -20,6 +20,8 @@ import static com.google.common.truth.Truth.assertThat;
 import com.google.api.server.spi.config.Api;
 import com.google.api.server.spi.config.ApiMethod;
 import com.google.api.server.spi.config.ApiMethod.HttpMethod;
+import com.google.api.server.spi.response.FoundRedirectException;
+import com.google.api.server.spi.response.SeeOtherRedirectException;
 import com.google.common.base.Splitter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -213,6 +215,28 @@ public class EndpointsServletTest {
         .containsExactly("HEAD", "DELETE", "GET", "PATCH", "POST", "PUT");
   }
 
+  @Test
+  public void redirectionGet_relativeToRequest() throws IOException {
+    req.setRequestURI("/_ah/api/test/v2/redirect");
+    req.setMethod("GET");
+
+    servlet.service(req, resp);
+
+    assertThat(resp.getStatus()).isEqualTo(HttpServletResponse.SC_FOUND);
+    assertThat(resp.getHeader("Location")).isEqualTo("/_ah/api/test/v2/redirect/new/location");
+  }
+
+  @Test
+  public void redirectionPost_locationWithScheme() throws IOException {
+    req.setRequestURI("/_ah/api/test/v2/redirect");
+    req.setMethod("POST");
+
+    servlet.service(req, resp);
+
+    assertThat(resp.getStatus()).isEqualTo(HttpServletResponse.SC_SEE_OTHER);
+    assertThat(resp.getHeader("Location")).isEqualTo("https://example.com/other/resource");
+  }
+
   public static class TestResource {
     public int x;
   }
@@ -226,10 +250,20 @@ public class EndpointsServletTest {
     public TestResource echo(TestResource r) {
       return r;
     }
-  
+
     @ApiMethod(httpMethod = HttpMethod.GET, path = "null")
     public TestResource nullResponse() {
       return null;
+    }
+
+    @ApiMethod(httpMethod = HttpMethod.GET, path = "redirect")
+    public TestResource redirect() throws ServiceException {
+      throw new FoundRedirectException("redirecting", "new/location");
+    }
+
+    @ApiMethod(httpMethod = HttpMethod.POST, path = "redirect")
+    public TestResource redirectSeeOther() throws ServiceException {
+      throw new SeeOtherRedirectException("redirecting", "https://example.com/other/resource");
     }
 
     @ApiMethod(httpMethod = "PATCH")

@@ -15,6 +15,9 @@
  */
 package com.google.api.server.spi.handlers;
 
+import static org.apache.http.HttpHeaders.CONTENT_TYPE;
+import static org.apache.http.HttpHeaders.LOCATION;
+
 import com.google.api.server.spi.EndpointMethod;
 import com.google.api.server.spi.EndpointsContext;
 import com.google.api.server.spi.Headers;
@@ -30,11 +33,15 @@ import com.google.api.server.spi.request.Attribute;
 import com.google.api.server.spi.request.ParamReader;
 import com.google.api.server.spi.request.RestServletRequestParamReader;
 import com.google.api.server.spi.response.InternalServerErrorException;
+import com.google.api.server.spi.response.RedirectException;
 import com.google.api.server.spi.response.RestResponseResultWriter;
 import com.google.api.server.spi.response.ResultWriter;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.flogger.FluentLogger;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.net.MalformedURLException;
+import java.net.URL;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -99,6 +106,49 @@ public class EndpointsMethodHandler {
       _createResultWriter(context, null).writeError(error);
   }
 
+  /*
+   * Commits the response with a status redirect and the location. The location is written in a hyperlink note,
+   * as advised in https://tools.ietf.org/html/rfc7231#section-6.4.
+   */
+  private void writeRedirect(EndpointsContext context, RedirectException e) throws IOException {
+    String location = getRedirectLocation(context, e.getLocation());
+    HttpServletResponse response = context.getResponse();
+    response.setHeader(LOCATION, location);
+    response.setHeader(CONTENT_TYPE, "text/html");
+    response.setStatus(e.getStatusCode());
+    String body = "<!DOCTYPE html>\n"
+            + "<html>"
+            + "<head><meta charset=\"utf-8\"></head>\n"
+            + "<body><a href=\"" + location + "\">redirection</a></body>"
+            + "</html>";
+    PrintWriter out = response.getWriter();
+    out.write(body);
+    out.flush();
+    logger.atInfo().log(e.getMessage());
+  }
+
+  @VisibleForTesting
+  static String getRedirectLocation(EndpointsContext context, String redirectDestination) {
+    String location;
+    try {
+      location = new URL(redirectDestination).toString();
+    } catch (MalformedURLException e) {
+      if (redirectDestination.startsWith("/")) {
+        // relative to the server
+        location = redirectDestination;
+      } else {
+        // relative to the request
+        String request = context.getRequest().getRequestURI();
+        if (request.endsWith("/")) {
+          location = request + redirectDestination;
+        } else {
+          location = request + "/" + redirectDestination;
+        }
+      }
+    }
+    return location;
+  }
+
   private ResultWriter _createResultWriter(EndpointsContext context,
       ApiSerializationConfig serializationConfig) {
     return new RestResponseResultWriter(context.getResponse(), serializationConfig,
@@ -125,6 +175,8 @@ public class EndpointsMethodHandler {
           CorsHandler.setAccessControlAllowCredentials(response);
         }
         systemService.invokeServiceMethod(service, endpointMethod.getMethod(), methodConfig.getEffectiveResponseStatus(), reader, writer);
+      } catch (RedirectException e) {
+        writeRedirect(context, e);
       } catch (ServiceException e) {
         writeError(context, e);
       } catch (Exception e) {
