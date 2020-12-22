@@ -24,7 +24,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.junit.rules.TemporaryFolder;
 
 import com.google.api.server.spi.IoUtil;
@@ -32,8 +31,6 @@ import com.google.api.server.spi.tools.testing.FakeClientLibGenerator;
 
 public class LocalClientLibGeneratorTest {
 
-  @Rule
-  public ExpectedException expectedException = ExpectedException.none();
   @Rule
   public TemporaryFolder tmpFolder = new TemporaryFolder();
 
@@ -92,31 +89,31 @@ public class LocalClientLibGeneratorTest {
   public void testInvalidDiscoveryFile_fails() throws Exception {
     assumeTrue(isToolInstalled());
 
-    expectedException.expect(IOException.class);
-
     discoveryDoc = IoUtil.readStream(FakeClientLibGenerator.class.getResourceAsStream("fake-api-config.json"));
     File destinationDir = tmpFolder.newFolder("destination");
-    generator.generateClientLib(discoveryDoc, "java", null, null, destinationDir);
+    Assert.assertThrows(IOException.class, () ->
+            generator.generateClientLib(discoveryDoc, "java", null, null, destinationDir)
+    );
   }
 
   @Test
   public void testDestinationIsFile_fails() throws Exception {
     assumeTrue(isToolInstalled());
 
-    expectedException.expect(IOException.class);
-
     File destinationFile = tmpFolder.newFile("destination");
-    generator.generateClientLib(discoveryDoc, "java", null, null, destinationFile);
+    Assert.assertThrows(IOException.class, () ->
+            generator.generateClientLib(discoveryDoc, "java", null, null, destinationFile)
+    );
   }
 
   @Test
   public void testLanguageUnsupported() throws Exception {
     assumeTrue(isToolInstalled());
 
-    expectedException.expect(IllegalArgumentException.class);
-    expectedException.expectMessage("Unsupported language: python");
-
-    generator.generateClientLib(discoveryDoc, "python", null, null, tmpFolder.getRoot());
+    IllegalArgumentException e = Assert.assertThrows(IllegalArgumentException.class, () ->
+            generator.generateClientLib(discoveryDoc, "python", null, null, tmpFolder.getRoot())
+    );
+    Assert.assertEquals("Unsupported language: python", e.getMessage());
   }
 
   /**
