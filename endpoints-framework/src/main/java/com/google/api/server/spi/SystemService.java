@@ -34,6 +34,7 @@ import com.google.api.server.spi.discovery.ProxyingDiscoveryService;
 import com.google.api.server.spi.request.ParamReader;
 import com.google.api.server.spi.response.BadRequestException;
 import com.google.api.server.spi.response.InternalServerErrorException;
+import com.google.api.server.spi.response.RedirectException;
 import com.google.api.server.spi.response.ResultWriter;
 import com.google.api.server.spi.response.UnauthorizedException;
 import com.google.common.base.Function;
@@ -341,7 +342,7 @@ public class SystemService {
    * and a {@code resultWriter} to write result.
    */
   public void invokeServiceMethod(Object service, Method method, int status, ParamReader paramReader,
-      ResultWriter resultWriter) throws IOException {
+      ResultWriter resultWriter) throws IOException, RedirectException {
 
     try {
       Object[] params = paramReader.read();
@@ -354,7 +355,9 @@ public class SystemService {
     } catch (InvocationTargetException e) {
       Throwable cause = e.getCause();
       Level level = Level.INFO;
-      if (cause instanceof ServiceException) {
+      if (cause instanceof RedirectException) {
+        throw (RedirectException) cause;
+      } else if (cause instanceof ServiceException) {
         resultWriter.writeError((ServiceException) cause);
       } else if (cause instanceof IllegalArgumentException) {
         resultWriter.writeError(
