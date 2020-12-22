@@ -10,17 +10,13 @@ import com.google.api.server.spi.response.UnauthorizedException;
 import java.util.Map;
 import java.util.logging.Level;
 
-import org.junit.Rule;
+import org.junit.Assert;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 @RunWith(JUnit4.class)
 public class ServiceExceptionTest {
-
-  @Rule
-  public ExpectedException expectedException = ExpectedException.none();
 
   @Test
   public void testWithLogLevel() {
@@ -34,7 +30,7 @@ public class ServiceExceptionTest {
   public void testExtraFields() {
     UnauthorizedException ex = new UnauthorizedException("");
     ex.putExtraField("isAdmin", TRUE)
-      .putExtraField("userId", Integer.valueOf(12))
+      .putExtraField("userId", 12)
       .putExtraField("userName", "John Doe");
     Map<String, Object> extraFields = ex.getExtraFields();
     assertThat(extraFields.size()).isEqualTo(3);
@@ -83,9 +79,9 @@ public class ServiceExceptionTest {
   }
 
   private void assertExtraFields_ReservedName_forbidden(String fieldName) {
-    expectedException.expect(IllegalArgumentException.class);
-    expectedException.expectMessage("The field name '" + fieldName + "' is reserved");
-
-    new ConflictException("Fails", "no extra " + fieldName).putExtraField(fieldName, "some other " + fieldName);
+    IllegalArgumentException e = Assert.assertThrows(IllegalArgumentException.class, () ->
+            new ConflictException("Fails", "no extra " + fieldName).putExtraField(fieldName, "some other " + fieldName)
+    );
+    assertThat(e.getMessage()).contains("The field name '" + fieldName + "' is reserved");
   }
 }

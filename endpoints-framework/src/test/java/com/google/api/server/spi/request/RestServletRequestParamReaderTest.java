@@ -39,10 +39,9 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
 import java.util.ArrayList;
+import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 import org.springframework.mock.web.MockHttpServletRequest;
@@ -72,9 +71,6 @@ public class RestServletRequestParamReaderTest {
   private ApiConfig apiConfig;
   private ApiMethodConfig methodConfig;
   
-  @Rule
-  public ExpectedException thrown = ExpectedException.none();
-
   @Before
   public void setUp() throws Exception {
     endpointMethod = EndpointMethod.create(TestApi.class,
@@ -297,10 +293,11 @@ public class RestServletRequestParamReaderTest {
   public void parseError() throws ServiceException {
     request.setContent("{\"field\": \"this is an invalid json".getBytes(StandardCharsets.UTF_8));
     RestServletRequestParamReader reader = createReader(ImmutableMap.of("path", "1234"));
-  
-    thrown.expect(BadRequestException.class);
-    thrown.expectMessage("Parse error");
-    reader.read();
+
+    BadRequestException e = Assert.assertThrows(BadRequestException.class,
+            reader::read
+    );
+    Assert.assertEquals("Parse error", e.getMessage());
   }
   
   @Test
@@ -381,11 +378,12 @@ public class RestServletRequestParamReaderTest {
 
   private void checkParseError(String location, String type, String details,
       RestServletRequestParamReader reader) throws ServiceException {
-    thrown.expect(BadRequestException.class);
-    thrown.expectMessage("for " + location);
-    thrown.expectMessage("of type '" + type + "'");
-    thrown.expectMessage(details);
-    reader.read();
+    BadRequestException e = Assert.assertThrows(BadRequestException.class,
+            reader::read
+    );
+    assertThat(e.getMessage()).contains("for " + location);
+    assertThat(e.getMessage()).contains("of type '" + type + "'");
+    assertThat(e.getMessage()).contains(details);
   }
 
   public enum TestEnum {
