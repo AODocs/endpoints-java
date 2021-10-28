@@ -32,6 +32,7 @@ inactive:
 - Runtime
   - Allow [adding arbitrary data](https://github.com/AODocs/endpoints-java/pull/20) to generic errors
   - [Improve returned errors](https://github.com/AODocs/endpoints-java/pull/30) on malformed JSON
+  - Validate request parameters through [Java bean validation](https://beanvalidation.org/) provided by [Hibernate validator](https://hibernate.org/validator/)
 - Discovery and Swagger
   - [Add description on resources and resource usage as request body](https://github.com/AODocs/endpoints-java/commit/bbb1eff2bb9e7d28fc2ec17599257d0ef610531d)
   - [Support declaring resource properties as required](https://github.com/AODocs/endpoints-java/pull/41)

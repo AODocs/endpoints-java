@@ -19,7 +19,6 @@ import com.google.auto.value.AutoValue;
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 
@@ -43,6 +42,7 @@ public abstract class ServletInitializationParameters {
   private static final String PRETTY_PRINT = "prettyPrint";
   private static final String ADD_CONTENT_LENGTH = "addContentLength";
   private static final String API_EXPLORER_URL_TEMPLATE = "apiExplorerUrlTemplate";
+  private static final String PARAMETER_VALIDATION = "enableParameterValidation";
 
   private static final Splitter CSV_SPLITTER = Splitter.on(',').omitEmptyStrings().trimResults();
   private static final Joiner CSV_JOINER = Joiner.on(',').skipNulls();
@@ -88,6 +88,11 @@ public abstract class ServletInitializationParameters {
    */
   public abstract boolean isAddContentLength();
   
+  /**
+   * Returns whether the request parameter validation is enabled.
+   */
+  public abstract boolean isParameterValidationEnabled();
+  
   @Nullable
   public abstract String getApiExplorerUrlTemplate();
 
@@ -98,6 +103,7 @@ public abstract class ServletInitializationParameters {
         .setExceptionCompatibilityEnabled(true)
         .setPrettyPrintEnabled(true)
         .setAddContentLength(false)
+        .setParameterValidationEnabled(true)
         .setApiExplorerUrlTemplate(null);
   }
 
@@ -141,10 +147,9 @@ public abstract class ServletInitializationParameters {
     public abstract Builder setIllegalArgumentBackendError(boolean illegalArgumentBackendError);
 
     /**
-     * Sets if v1.0 style exceptions should be returned to users. In v1.0, certain codes are not
-     * permissible, and other codes are translated to other status codes. Defaults to {@code true}.
+     * Sets if request parameter validation should be enabled. Defaults to {@code true}.
      */
-    public abstract Builder setExceptionCompatibilityEnabled(boolean exceptionCompatibility);
+    public abstract Builder setParameterValidationEnabled(boolean enabledParameterValidation);
 
     /**
      * Sets if pretty printing should be enabled for responses by default. Defaults to {@code true}.
@@ -163,7 +168,13 @@ public abstract class ServletInitializationParameters {
      * Defaults to http://apis-explorer.appspot.com/apis-explorer/?base=${apiBase} if not set.
      */
     public abstract Builder setApiExplorerUrlTemplate(String urlTemplate);
-
+  
+    /**
+     * Sets if v1.0 style exceptions should be returned to users. In v1.0, certain codes are not
+     * permissible, and other codes are translated to other status codes. Defaults to {@code true}.
+     */
+    public abstract Builder setExceptionCompatibilityEnabled(boolean exceptionCompatibility);
+    
     abstract ServletInitializationParameters autoBuild();
 
     public ServletInitializationParameters build() {
@@ -207,6 +218,11 @@ public abstract class ServletInitializationParameters {
       if (addContentLength != null) {
         builder.setAddContentLength(parseBoolean(addContentLength, ADD_CONTENT_LENGTH));
       }
+      String enabledParameterValidation = config.getInitParameter(PARAMETER_VALIDATION);
+      if (enabledParameterValidation != null) {
+        builder.setParameterValidationEnabled(
+                parseBoolean(enabledParameterValidation, PARAMETER_VALIDATION));
+      }
       builder.setApiExplorerUrlTemplate(config.getInitParameter(API_EXPLORER_URL_TEMPLATE));
     }
     return builder.build();
@@ -243,6 +259,7 @@ public abstract class ServletInitializationParameters {
           put(EXCEPTION_COMPATIBILITY, Boolean.toString(isExceptionCompatibilityEnabled()));
           put(PRETTY_PRINT, Boolean.toString(isPrettyPrintEnabled()));
           put(ADD_CONTENT_LENGTH, Boolean.toString(isAddContentLength()));
+          put(PARAMETER_VALIDATION, Boolean.toString(isParameterValidationEnabled()));
           put(API_EXPLORER_URL_TEMPLATE, getApiExplorerUrlTemplate());
       }};
   }

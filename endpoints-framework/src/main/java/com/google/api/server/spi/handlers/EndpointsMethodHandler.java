@@ -86,9 +86,9 @@ public class EndpointsMethodHandler {
 
   @VisibleForTesting
   protected ParamReader createRestParamReader(EndpointsContext context,
-      ApiSerializationConfig serializationConfig) {
-    return new RestServletRequestParamReader(endpointMethod, context,
-        servletContext, serializationConfig, methodConfig);
+      ApiSerializationConfig serializationConfig, Object service) {
+    return new RestServletRequestParamReader(service, endpointMethod, context,
+        servletContext, serializationConfig, methodConfig, initParameters.isParameterValidationEnabled());
   }
 
   /**
@@ -167,7 +167,7 @@ public class EndpointsMethodHandler {
         Object service = systemService.findService(serviceName);
         ApiSerializationConfig serializationConfig = systemService.getSerializationConfig(
             serviceName);
-        ParamReader reader = createRestParamReader(context, serializationConfig);
+        ParamReader reader = createRestParamReader(context, serializationConfig, service);
         ResultWriter writer = createResultWriter(context, serializationConfig);
         if (request.getHeader(Headers.ORIGIN) != null) {
           HttpServletResponse response = context.getResponse();

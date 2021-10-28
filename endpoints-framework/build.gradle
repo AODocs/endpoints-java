@@ -102,6 +102,9 @@ dependencies {
   compileOnly group: 'com.google.auto.value', name: 'auto-value-annotations', version: autoValueVersion
   annotationProcessor group: 'com.google.auto.value', name: 'auto-value', version: autoValueVersion
 
+  api group: 'org.hibernate.validator', name: 'hibernate-validator', version: hibernateValidatorVersion
+  api group: 'javax.validation', name: 'validation-api', version: validationApiVersion
+
   testImplementation project(':test-utils')
   testImplementation project(':discovery-client')
   testImplementation group: 'junit', name: 'junit', version: junitVersion

@@ -65,6 +65,7 @@ public class RestServletRequestParamReaderTest {
   public static final SimpleDate NOV_2 = new SimpleDate(2015, 11, 2);
   public static final SimpleDate NOV_1 = new SimpleDate(2015, 11, 1);
 
+  private TestApi service;
   private EndpointMethod endpointMethod;
   private MockHttpServletRequest request;
   private ApiSerializationConfig serializationConfig;
@@ -73,6 +74,7 @@ public class RestServletRequestParamReaderTest {
   
   @Before
   public void setUp() throws Exception {
+    service = new TestApi();
     endpointMethod = EndpointMethod.create(TestApi.class,
         TestApi.class.getMethod("test", Long.TYPE, List.class, TestEnum.class,
             SimpleDate.class, TestResource.class));
@@ -364,8 +366,8 @@ public class RestServletRequestParamReaderTest {
     EndpointsContext endpointsContext =
         new EndpointsContext("GET", "/", request, new MockHttpServletResponse(), true);
     endpointsContext.setRawPathParameters(rawPathParameters);
-    return new RestServletRequestParamReader(endpointMethod, endpointsContext, null,
-        serializationConfig, methodConfig);
+    return new RestServletRequestParamReader(service, endpointMethod, endpointsContext, null,
+        serializationConfig, methodConfig, true);
   }
 
   private void checkContentParseError(String content, String location, String type, String details)

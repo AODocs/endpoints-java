@@ -62,10 +62,10 @@ public class RestServletRequestParamReader extends ServletRequestParamReader {
   private final Map<String, String> rawPathParameters;
   private final Map<String, ApiParameterConfig> parameterConfigMap;
 
-  public RestServletRequestParamReader(EndpointMethod method,
+  public RestServletRequestParamReader(Object service, EndpointMethod method,
       EndpointsContext endpointsContext, ServletContext servletContext,
-      ApiSerializationConfig serializationConfig, ApiMethodConfig methodConfig) {
-    super(method, endpointsContext, servletContext, serializationConfig, methodConfig);
+      ApiSerializationConfig serializationConfig, ApiMethodConfig methodConfig, boolean validationEnabled) {
+    super(service, method, endpointsContext, servletContext, serializationConfig, methodConfig, validationEnabled);
     this.rawPathParameters = endpointsContext.getRawPathParameters();
     ImmutableMap.Builder<String, ApiParameterConfig> builder = ImmutableMap.builder();
     for (ApiParameterConfig config : methodConfig.getParameterConfigs()) {
@@ -157,7 +157,7 @@ public class RestServletRequestParamReader extends ServletRequestParamReader {
           params.put(entry.getKey(), entry.getValue().getDefaultValue());
         }
       }
-      return deserializeParams(body, params);
+      return validateParameters(deserializeParams(body, params));
     } catch (MismatchedInputException e) {
       logger.atInfo().withCause(e).log("Unable to read request parameter(s)");
       throw translateJsonException(e);

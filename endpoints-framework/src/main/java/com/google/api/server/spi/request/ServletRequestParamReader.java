@@ -52,6 +52,9 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
+import javax.validation.ConstraintViolation;
+import javax.validation.Validation;
+import javax.validation.Validator;
 
 import java.io.IOException;
 import java.lang.annotation.Annotation;
@@ -72,6 +75,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import org.hibernate.validator.messageinterpolation.ParameterMessageInterpolator;
+
 /**
  * Reads parameters from an {@link HttpServletRequest}.
  */
@@ -80,6 +85,11 @@ public class ServletRequestParamReader extends AbstractParamReader {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
   private static final Set<SimpleModule> READER_MODULES;
   private static final String APPENGINE_USER_CLASS_NAME = "com.google.appengine.api.users.User";
+  private static final Validator VALIDATOR = Validation.byDefaultProvider()
+          .configure()
+          .messageInterpolator(new ParameterMessageInterpolator())
+          .buildValidatorFactory()
+          .getValidator();
 
   static {
     Set<SimpleModule> modules = new LinkedHashSet<>();
@@ -325,14 +335,16 @@ public class ServletRequestParamReader extends AbstractParamReader {
   private final ServletContext servletContext;
   protected final ObjectReader objectReader;
   protected final ApiMethodConfig methodConfig;
+  protected final boolean validationEnabled;
 
   public ServletRequestParamReader(
-      EndpointMethod method,
+      Object service, EndpointMethod method,
       EndpointsContext endpointsContext,
       ServletContext servletContext,
       ApiSerializationConfig serializationConfig,
-      ApiMethodConfig methodConfig) {
-    super(method);
+      ApiMethodConfig methodConfig,
+      boolean validationEnabled) {
+    super(service, method);
 
     this.methodConfig = methodConfig;
     this.endpointsContext = endpointsContext;
@@ -347,6 +359,7 @@ public class ServletRequestParamReader extends AbstractParamReader {
         .build()
         .reader()
         .with(Base64Variants.MIME_NO_LINEFEEDS);
+    this.validationEnabled = validationEnabled;
   }
 
   @Override
@@ -366,7 +379,7 @@ public class ServletRequestParamReader extends AbstractParamReader {
       //this convention comes from gapi.client to separate params and body
       JsonNode resource = node.get("resource");
       ((ObjectNode) node).remove("resource");
-      return deserializeParams(resource, node);
+      return validateParameters(deserializeParams(resource, node));
     } catch (MismatchedInputException e) {
       logger.atInfo().withCause(e).log("Unable to read request parameter(s)");
       throw translateJsonException(e);
@@ -442,5 +455,20 @@ public class ServletRequestParamReader extends AbstractParamReader {
         || long.class.equals(clazz)
         || float.class.equals(clazz)
         || double.class.equals(clazz);
+  }
+
+  protected Object[] validateParameters(Object[] parameterValues) throws BadRequestException {
+    if (validationEnabled) {
+      Set<ConstraintViolation<Object>> constraintViolations = VALIDATOR.forExecutables().validateParameters(getService(), getMethod().getMethod(), parameterValues);
+      if (!constraintViolations.isEmpty()) {
+        List<String> errors = new ArrayList<>();
+        for (ConstraintViolation<Object> violation : constraintViolations) {
+          String error = violation.getPropertyPath().toString() + " " + violation.getMessage();
+          errors.add(error);
+        }
+        throw new BadRequestException("Invalid parameters : " + errors);
+      }
+    }
+    return parameterValues;
   }
 }

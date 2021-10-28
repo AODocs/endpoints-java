@@ -53,11 +53,15 @@ import java.util.GregorianCalendar;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TimeZone;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
+import javax.validation.Valid;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.Pattern;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -137,7 +141,7 @@ public class ServletRequestParamReaderTest {
   public void testReadDate() throws Exception {
     Method method = TestEndpoint.class.getDeclaredMethod("getDate", Date.class);
     Object[] params =
-        readParameters("{" + TestEndpoint.NAME_DATE + ":\"1970-01-01T00:00:00Z\"}", method);
+        readParameters("{" + TestEndpoint.NAME_DATE + ":\"1970-01-01T00:00:00Z\"}", method, new TestEndpoint());
 
     assertEquals(1, params.length);
     assertEquals(new Date(0), params[0]);
@@ -196,7 +200,7 @@ public class ServletRequestParamReaderTest {
     } else {
       builder.replace(builder.length() - 1, builder.length(), "}");
     }
-    Object[] params = readParameters(builder.toString(), method);
+    Object[] params = readParameters(builder.toString(), method, new TestEndpoint());
     assertEquals(15, params.length);
     return params;
   }
@@ -207,7 +211,7 @@ public class ServletRequestParamReaderTest {
     String dateAndTimeString = "2002-10-02T10:00:00-05:00";
 
     Object[] params = readParameters(
-        "{" + TestEndpoint.NAME_DATE_AND_TIME + ":\"" + dateAndTimeString + "\"}", method);
+        "{" + TestEndpoint.NAME_DATE_AND_TIME + ":\"" + dateAndTimeString + "\"}", method, new TestEndpoint());
 
     assertEquals(1, params.length);
     assertEquals(DateAndTime.parseRfc3339String(dateAndTimeString), params[0]);
@@ -219,7 +223,7 @@ public class ServletRequestParamReaderTest {
     Method method = TestEndpoint.class.getDeclaredMethod("getSimpleDate", SimpleDate.class);
     Object[] params = null;
     params = readParameters(
-        "{" + TestEndpoint.NAME_DATE_AND_TIME + ":\"2002-10-02\"}", method);
+        "{" + TestEndpoint.NAME_DATE_AND_TIME + ":\"2002-10-02\"}", method, new TestEndpoint());
     assertThat(Arrays.asList(params)).containsExactly(new SimpleDate(2002, 10, 2)).inOrder();
   }
 
@@ -241,7 +245,7 @@ public class ServletRequestParamReaderTest {
   @Test
   public void testReadNoParameters() throws Exception {
     Method method = TestEndpoint.class.getDeclaredMethod("getResultNoParams");
-    Object[] params = readParameters("", method);
+    Object[] params = readParameters("", method, new TestEndpoint());
     assertEquals(0, params.length);
   }
 
@@ -249,7 +253,7 @@ public class ServletRequestParamReaderTest {
   public void testReadByteArrayParameter() throws Exception {
     Method method =
         TestEndpoint.class.getDeclaredMethod("doSomething", byte[].class);
-    Object[] params = readParameters("{\"bytes\":\"AQIDBA==\"}", method);
+    Object[] params = readParameters("{\"bytes\":\"AQIDBA==\"}", method, new TestEndpoint());
 
     assertEquals(1, params.length);
     assertThat((byte[]) params[0]).isEqualTo(new byte[]{1, 2, 3, 4});
@@ -259,7 +263,7 @@ public class ServletRequestParamReaderTest {
   public void testReadBlobParameter() throws Exception {
     Method method =
         TestEndpoint.class.getDeclaredMethod("doBlob", Blob.class);
-    Object[] params = readParameters("{\"blob\":\"AQIDBA==\"}", method);
+    Object[] params = readParameters("{\"blob\":\"AQIDBA==\"}", method, new TestEndpoint());
 
     assertEquals(1, params.length);
     assertThat(((Blob) params[0]).getBytes()).isEqualTo(new byte[]{1, 2, 3, 4});
@@ -268,7 +272,7 @@ public class ServletRequestParamReaderTest {
   @Test
   public void testReadEnumParameter() throws Exception {
     Method method = TestEndpoint.class.getDeclaredMethod("doEnum", TestEndpoint.TestEnum.class);
-    Object[] params = readParameters("{" + TestEndpoint.NAME_ENUM + ":\"TEST1\"}", method);
+    Object[] params = readParameters("{" + TestEndpoint.NAME_ENUM + ":\"TEST1\"}", method, new TestEndpoint());
 
     assertEquals(1, params.length);
     assertEquals(TestEndpoint.TestEnum.TEST1, params[0]);
@@ -282,7 +286,7 @@ public class ServletRequestParamReaderTest {
     }
     Method method = Test.class.getDeclaredMethod("collection", List.class);
 
-    Object[] params = readParameters("{}", method);
+    Object[] params = readParameters("{}", method, new Test());
     assertEquals(1, params.length);
     @SuppressWarnings("unchecked")
     List<Integer> integers = (List<Integer>) params[0];
@@ -297,7 +301,7 @@ public class ServletRequestParamReaderTest {
     }
     Method method = Test.class.getDeclaredMethod("collection", Integer[].class);
 
-    Object[] params = readParameters("{}", method);
+    Object[] params = readParameters("{}", method, new Test());
     assertEquals(1, params.length);
     @SuppressWarnings("unchecked")
     Integer[] integers = (Integer[]) params[0];
@@ -312,7 +316,7 @@ public class ServletRequestParamReaderTest {
     }
     Method method = Test.class.getDeclaredMethod("collection", Collection.class);
     doTestCollectionParameter(
-        "collection", EndpointMethod.create(Test.class, method));
+        "collection", EndpointMethod.create(Test.class, method), new Test());
   }
 
   @Test
@@ -324,7 +328,7 @@ public class ServletRequestParamReaderTest {
     class Test extends TestGeneric<Integer> {}
     doTestCollectionParameter("collection", EndpointMethod.create(
         Test.class, Test.class.getMethod("collection", Collection.class),
-        TypeToken.of(Test.class).getSupertype(TestGeneric.class)));
+        TypeToken.of(Test.class).getSupertype(TestGeneric.class)), new Test());
   }
 
   @Test
@@ -335,7 +339,7 @@ public class ServletRequestParamReaderTest {
     }
     Method method = Test.class.getDeclaredMethod("collection", List.class);
     doTestCollectionParameter(
-        "list", EndpointMethod.create(Test.class, method));
+        "list", EndpointMethod.create(Test.class, method), new Test());
   }
 
   @Test
@@ -346,7 +350,7 @@ public class ServletRequestParamReaderTest {
     }
     Method method = Test.class.getDeclaredMethod("collection", Set.class);
     doTestSetParameter(
-        "set", EndpointMethod.create(Test.class, method));
+        "set", EndpointMethod.create(Test.class, method), new Test());
   }
 
   @Test
@@ -357,11 +361,11 @@ public class ServletRequestParamReaderTest {
     }
     Method method = Test.class.getDeclaredMethod("array", Integer[].class);
     doTestReadArrayParameter(
-        "array", EndpointMethod.create(Test.class, method));
+        "array", EndpointMethod.create(Test.class, method), new Test());
   }
 
-  private void doTestCollectionParameter(String name, EndpointMethod method) throws Exception {
-    Object[] params = readParameters("{\"" + name + "\":[1,2,3]}", method);
+  private void doTestCollectionParameter(String name, EndpointMethod method, Object service) throws Exception {
+    Object[] params = readParameters("{\"" + name + "\":[1,2,3]}", method, service);
 
     assertEquals(1, params.length);
     @SuppressWarnings("unchecked")
@@ -382,11 +386,11 @@ public class ServletRequestParamReaderTest {
     class Test extends TestGeneric<Integer> {}
     doTestReadArrayParameter("array", EndpointMethod.create(
         Test.class, Test.class.getMethod("array", Object[].class),
-        TypeToken.of(Test.class).getSupertype(TestGeneric.class)));
+        TypeToken.of(Test.class).getSupertype(TestGeneric.class)), new Test());
   }
 
-  private void doTestSetParameter(String name, EndpointMethod method) throws Exception {
-    Object[] params = readParameters("{\"" + name + "\":[1,2,1]}", method);
+  private void doTestSetParameter(String name, EndpointMethod method, Object service) throws Exception {
+    Object[] params = readParameters("{\"" + name + "\":[1,2,1]}", method, service);
 
     assertEquals(1, params.length);
     @SuppressWarnings("unchecked")
@@ -395,8 +399,8 @@ public class ServletRequestParamReaderTest {
     assertTrue(integers.contains(1));
   }
 
-  private void doTestReadArrayParameter(String name, EndpointMethod method) throws Exception {
-    Object[] params = readParameters("{\"" + name + "\":[1,2,3]}", method);
+  private void doTestReadArrayParameter(String name, EndpointMethod method, Object service) throws Exception {
+    Object[] params = readParameters("{\"" + name + "\":[1,2,3]}", method, service);
 
     assertEquals(1, params.length);
     Integer[] integers = (Integer[]) params[0];
@@ -414,7 +418,7 @@ public class ServletRequestParamReaderTest {
     }
     Method method = Test.class.getDeclaredMethod("collection", Collection.class);
     doTestReadCollectionDateParameter(
-        "collection", EndpointMethod.create(Test.class, method));
+        "collection", EndpointMethod.create(Test.class, method), new Test());
   }
 
   @Test
@@ -426,13 +430,13 @@ public class ServletRequestParamReaderTest {
     class Test extends TestGeneric<Date> {}
     doTestReadCollectionDateParameter("collection", EndpointMethod.create(
         Test.class, Test.class.getMethod("collection", Collection.class),
-        TypeToken.of(Test.class).getSupertype(TestGeneric.class)));
+        TypeToken.of(Test.class).getSupertype(TestGeneric.class)), new Test());
   }
 
   private void doTestReadCollectionDateParameter(
-      String name, EndpointMethod method) throws Exception {
+      String name, EndpointMethod method, Object service) throws Exception {
     Object[] params = readParameters(
-        "{\"" + name + "\":[\"2002-10-01\",\"2002-10-02\",\"2002-10-03\"]}", method);
+        "{\"" + name + "\":[\"2002-10-01\",\"2002-10-02\",\"2002-10-03\"]}", method, service);
 
     assertEquals(1, params.length);
     @SuppressWarnings("unchecked")
@@ -452,7 +456,7 @@ public class ServletRequestParamReaderTest {
     }
     Method method = Test.class.getDeclaredMethod("array", Date[].class);
     doTestReadArrayDateParameter(
-        "array", EndpointMethod.create(Test.class, method));
+        "array", EndpointMethod.create(Test.class, method), new Test());
   }
 
   @Test
@@ -464,12 +468,12 @@ public class ServletRequestParamReaderTest {
     class Test extends TestGeneric<Date> {}
     doTestReadArrayDateParameter("array", EndpointMethod.create(
         Test.class, Test.class.getMethod("array", Object[].class),
-        TypeToken.of(Test.class).getSupertype(TestGeneric.class)));
+        TypeToken.of(Test.class).getSupertype(TestGeneric.class)), new Test());
   }
 
-  private void doTestReadArrayDateParameter(String name, EndpointMethod method) throws Exception {
+  private void doTestReadArrayDateParameter(String name, EndpointMethod method, Object service) throws Exception {
     Object[] params = readParameters(
-        "{\"" + name + "\":[\"2002-10-01\",\"2002-10-02\",\"2002-10-03\"]}", method);
+        "{\"" + name + "\":[\"2002-10-01\",\"2002-10-02\",\"2002-10-03\"]}", method, service);
 
     assertEquals(1, params.length);
     Date[] dates = (Date[]) params[0];
@@ -491,7 +495,7 @@ public class ServletRequestParamReaderTest {
     }
     Method method = Test.class.getDeclaredMethod("collection", Collection.class);
     doTestReadCollectionEnumParameter(
-        "collection", EndpointMethod.create(Test.class, method));
+        "collection", EndpointMethod.create(Test.class, method), new Test());
   }
 
   @Test
@@ -503,12 +507,12 @@ public class ServletRequestParamReaderTest {
     class Test extends TestGeneric<Outcome> {}
     doTestReadCollectionEnumParameter("collection", EndpointMethod.create(
         Test.class, Test.class.getMethod("collection", Collection.class),
-        TypeToken.of(Test.class).getSupertype(TestGeneric.class)));
+        TypeToken.of(Test.class).getSupertype(TestGeneric.class)), new Test());
   }
 
   private void doTestReadCollectionEnumParameter(
-      String name, EndpointMethod method) throws Exception {
-    Object[] params = readParameters("{\"" + name + "\":[\"WON\",\"LOST\",\"TIE\"]}", method);
+      String name, EndpointMethod method, Object service) throws Exception {
+    Object[] params = readParameters("{\"" + name + "\":[\"WON\",\"LOST\",\"TIE\"]}", method, service);
 
     assertEquals(1, params.length);
     @SuppressWarnings("unchecked")
@@ -527,7 +531,7 @@ public class ServletRequestParamReaderTest {
       public void array(@Named("array") Outcome[] outcomes) {}
     }
     Method method = Test.class.getDeclaredMethod("array", Outcome[].class);
-    doTestReadArrayEnumParameter("array", EndpointMethod.create(Test.class, method));
+    doTestReadArrayEnumParameter("array", EndpointMethod.create(Test.class, method), new Test());
   }
 
   @Test
@@ -539,11 +543,11 @@ public class ServletRequestParamReaderTest {
     class Test extends TestGeneric<Outcome> {}
     doTestReadArrayEnumParameter("array", EndpointMethod.create(
         Test.class, Test.class.getMethod("array", Object[].class),
-        TypeToken.of(Test.class).getSupertype(TestGeneric.class)));
+        TypeToken.of(Test.class).getSupertype(TestGeneric.class)), new Test());
   }
 
-  private void doTestReadArrayEnumParameter(String name, EndpointMethod method) throws Exception {
-    Object[] params = readParameters("{\"" + name + "\":[\"WON\",\"LOST\",\"TIE\"]}", method);
+  private void doTestReadArrayEnumParameter(String name, EndpointMethod method, Object service) throws Exception {
+    Object[] params = readParameters("{\"" + name + "\":[\"WON\",\"LOST\",\"TIE\"]}", method, service);
 
     assertEquals(1, params.length);
     Outcome[] outcomes = (Outcome[]) params[0];
@@ -569,7 +573,7 @@ public class ServletRequestParamReaderTest {
 
     Method method = TestMultipleResources.class.getDeclaredMethod("foo",
         String.class, Integer[].class, Collection.class, Request.class);
-    Object[] params = readParameters(requestString, method);
+    Object[] params = readParameters(requestString, method, new TestMultipleResources());
 
     assertEquals(4, params.length);
     String string = (String) params[0];
@@ -602,7 +606,7 @@ public class ServletRequestParamReaderTest {
     String requestString = "{\"str\":\"hello\"}";
 
     Method method = Test.class.getDeclaredMethod("foo", String.class, Integer.class);
-    Object[] params = readParameters(requestString, method);
+    Object[] params = readParameters(requestString, method, new Test());
 
     assertEquals(2, params.length);
     assertEquals("hello", params[0]);
@@ -623,7 +627,7 @@ public class ServletRequestParamReaderTest {
 
     String requestString = "{\"name1\":\"v1\", \"foo2\":\"v2\", \"name3\":\"v3\"}";
 
-    Object[] params = readParameters(requestString, endpointMethod);
+    Object[] params = readParameters(requestString, endpointMethod, new Test());
 
     assertEquals(3, params.length);
     assertEquals("v1", params[0]);
@@ -644,7 +648,7 @@ public class ServletRequestParamReaderTest {
     Method method = Test.class.getDeclaredMethod("foo", String.class, String.class, String.class);
     EndpointMethod endpointMethod = EndpointMethod.create(method.getDeclaringClass(), method);
 
-    readParameters("{}", endpointMethod);
+    readParameters("{}", endpointMethod, new Test());
     List<String> parameterNames = endpointMethod.getParameterNames();
 
     assertEquals(3, parameterNames.size());
@@ -668,8 +672,8 @@ public class ServletRequestParamReaderTest {
     final TestUser user = new TestUser("test");
     Method method = TestUserEndpoint.class.getDeclaredMethod("user", TestUser.class);
     ParamReader reader = new ServletRequestParamReader(
-        EndpointMethod.create(method.getDeclaringClass(), method), endpointsContext, context, null,
-        null) {
+            new TestUserEndpoint(), EndpointMethod.create(method.getDeclaringClass(), method), endpointsContext, context, null,
+        null, true) {
       @Override
       User getUser() {
         return user;
@@ -694,7 +698,7 @@ public class ServletRequestParamReaderTest {
     String ip = "9.8.7.6";
     when(request.getRemoteAddr()).thenReturn(ip);
     Object[] params = readParameters("{}",
-        TestUserIp.class.getDeclaredMethod("userIp", String.class));
+        TestUserIp.class.getDeclaredMethod("userIp", String.class), new TestUserIp());
     assertEquals(1, params.length);
     assertEquals(ip, params[0]);
   }
@@ -706,7 +710,7 @@ public class ServletRequestParamReaderTest {
       public void alt(@Named("alt") String alt) {}
     }
     Object[] params = readParameters(
-        "{\"alt\":\"test\"}", TestAlt.class.getDeclaredMethod("alt", String.class));
+        "{\"alt\":\"test\"}", TestAlt.class.getDeclaredMethod("alt", String.class), new TestAlt());
     assertEquals(1, params.length);
     assertEquals("test", params[0]);
   }
@@ -717,7 +721,7 @@ public class ServletRequestParamReaderTest {
       @SuppressWarnings("unused")
       public void alt(@Named("alt") String alt) {}
     }
-    Object[] params = readParameters("{}", TestAlt.class.getDeclaredMethod("alt", String.class));
+    Object[] params = readParameters("{}", TestAlt.class.getDeclaredMethod("alt", String.class), new TestAlt());
     assertEquals(1, params.length);
     assertEquals("json", params[0]);
   }
@@ -729,7 +733,7 @@ public class ServletRequestParamReaderTest {
       public void fields(@Named("fields") String fields) {}
     }
     Object[] params = readParameters(
-        "{\"fields\":\"test\"}", TestFields.class.getDeclaredMethod("fields", String.class));
+        "{\"fields\":\"test\"}", TestFields.class.getDeclaredMethod("fields", String.class), new TestFields());
     assertEquals(1, params.length);
     assertEquals("test", params[0]);
   }
@@ -741,7 +745,7 @@ public class ServletRequestParamReaderTest {
       public void key(@Named("key") String key) {}
     }
     Object[] params = readParameters(
-        "{\"key\":\"test\"}", TestKey.class.getDeclaredMethod("key", String.class));
+        "{\"key\":\"test\"}", TestKey.class.getDeclaredMethod("key", String.class), new TestKey());
     assertEquals(1, params.length);
     assertEquals("test", params[0]);
   }
@@ -754,7 +758,7 @@ public class ServletRequestParamReaderTest {
     }
     Object[] params = readParameters(
         "{\"oauth_token\":\"test\"}",
-        TestOAuthToken.class.getDeclaredMethod("oAuthToken", String.class));
+        TestOAuthToken.class.getDeclaredMethod("oAuthToken", String.class), new TestOAuthToken());
     assertEquals(1, params.length);
     assertEquals("test", params[0]);
   }
@@ -767,7 +771,7 @@ public class ServletRequestParamReaderTest {
     }
     Object[] params = readParameters(
         "{\"quotaUser\":\"test\"}",
-        TestQuotaUser.class.getDeclaredMethod("quotaUser", String.class));
+        TestQuotaUser.class.getDeclaredMethod("quotaUser", String.class), new TestQuotaUser());
     assertEquals(1, params.length);
     assertEquals("test", params[0]);
   }
@@ -780,7 +784,7 @@ public class ServletRequestParamReaderTest {
     }
     when(request.getParameter("prettyPrint")).thenReturn("false");
     Object[] params =
-        readParameters("{}", TestPrettyPrint.class.getDeclaredMethod("prettyPrint", String.class));
+        readParameters("{}", TestPrettyPrint.class.getDeclaredMethod("prettyPrint", String.class), new TestPrettyPrint());
     assertEquals(1, params.length);
     assertEquals(false, params[0]);
   }
@@ -792,7 +796,7 @@ public class ServletRequestParamReaderTest {
       public void prettyPrint(@Named("prettyPrint") String prettyPrint) {}
     }
     Object[] params =
-        readParameters("{}", TestPrettyPrint.class.getDeclaredMethod("prettyPrint", String.class));
+        readParameters("{}", TestPrettyPrint.class.getDeclaredMethod("prettyPrint", String.class), new TestPrettyPrint());
     assertEquals(1, params.length);
     assertEquals(true, params[0]);
   }
@@ -808,7 +812,7 @@ public class ServletRequestParamReaderTest {
         "{\"stringValue\": [\"fromParams\"], \"integerValue\": [1,2,3], " 
             + "\"resource\": {\"stringValue\": \"abc\", \"integerValue\": 42}}",
         TestNameInParamsAndResource.class
-            .getDeclaredMethod("test", List.class, List.class, Request.class));
+            .getDeclaredMethod("test", List.class, List.class, Request.class), new TestNameInParamsAndResource());
     assertEquals(3, params.length);
     assertEquals(Collections.singletonList("fromParams"), params[0]);
     assertEquals(ImmutableList.of(1,2,3), params[1]);
@@ -825,7 +829,7 @@ public class ServletRequestParamReaderTest {
       readParameters(
           "{\"resource\": {\"integerValue\": [42]}}",
           TesTypeMismatch.class
-              .getDeclaredMethod("test", Request.class));
+              .getDeclaredMethod("test", Request.class), new TesTypeMismatch());
       fail("expected bad request exception");
     } catch (BadRequestException e) {
       assertEquals("Parse error for field 'integerValue' of type 'int'", e.getMessage());
@@ -848,7 +852,8 @@ public class ServletRequestParamReaderTest {
           "{}", EndpointMethod.create(method.getDeclaringClass(), method),
           methodConfig,
           null,
-          null);
+          null, 
+          new TestUser());
       fail("expected unauthorized method exception");
     } catch (UnauthorizedException ex) {
       // expected
@@ -873,7 +878,8 @@ public class ServletRequestParamReaderTest {
           EndpointMethod.create(method.getDeclaringClass(), method),
           methodConfig,
           null,
-          null);
+          null,
+          new TestUser());
       fail("expected unauthorized method exception");
     } catch (UnauthorizedException ex) {
       // expected
@@ -889,27 +895,124 @@ public class ServletRequestParamReaderTest {
     try {
       Object[] params =
           readParameters("{}",
-              TestNullValueForRequiredParam.class.getDeclaredMethod("test", String.class));
+              TestNullValueForRequiredParam.class.getDeclaredMethod("test", String.class), new TestNullValueForRequiredParam());
       fail("expected bad request exception");
     } catch (BadRequestException ex) {
       // expected
     }
   }
 
-  private Object[] readParameters(String input, Method method) throws Exception {
-    return readParameters(input, EndpointMethod.create(method.getDeclaringClass(), method));
+  @Test
+  public void testPatternAnnotation_noMatch() throws Exception {
+    class TestPatternAnnotation {
+      @SuppressWarnings("unused")
+      public void test(@Named("testParam") @Pattern(regexp = "^\\d{2}$") String testParam) {}
+    }
+    try {
+      readParameters("{\"testParam\":\"123\"}",
+                      TestPatternAnnotation.class.getDeclaredMethod("test", String.class), new TestPatternAnnotation());
+      fail("expected bad request exception");
+    } catch (BadRequestException ex) {
+      assertTrue("failed for unexpected reason: " + ex.getMessage(), ex.getMessage().contains("test.testParam must match"));
+    }
+  }
+  
+  @Test
+  public void testPatternAnnotation_match() throws Exception {
+    class TestPatternAnnotation {
+      @SuppressWarnings("unused")
+      public void test(@Named("testParam") @Pattern(regexp = "^\\d{2}$") String testParam) {}
+    }
+    Object[] params = readParameters("{\"testParam\":\"42\"}", 
+            TestPatternAnnotation.class.getDeclaredMethod("test", String.class), new TestPatternAnnotation());
+    assertEquals(1, params.length);
+    assertEquals("42", params[0]);
+  }
+  
+  @Test
+  public void testPatternAnnotation_customError() throws Exception {
+    class TestPatternAnnotation {
+      @SuppressWarnings("unused")
+      public void test(@Named("testParam") @Pattern(regexp = "^\\d{2}$", message="custom error message") String testParam) {}
+    }
+    try {
+      readParameters("{\"testParam\":\"invalidValue\"}",
+              TestPatternAnnotation.class.getDeclaredMethod("test", String.class), new TestPatternAnnotation());
+      fail("expected bad request exception");
+    } catch (BadRequestException ex) {
+      assertTrue("failed for unexpected reason: " + ex.getMessage(), ex.getMessage().contains("test.testParam custom error message"));
+    }
+  }
+  
+  static class TestPatternAnnotationInResourceRequest {
+    
+    @Min(value = 3)
+    private Integer integerValue;
+    
+    public TestPatternAnnotationInResourceRequest() {
+    }
+    
+    public TestPatternAnnotationInResourceRequest(Integer stringValue) {
+      this.integerValue = stringValue;
+    }
+    
+    public void setIntegerValue(Integer integerValue) {
+      this.integerValue = integerValue;
+    }
+    
+    public Integer getIntegerValue() {
+      return integerValue;
+    }
+    
+    @Override
+    public boolean equals(Object o) {
+      if (this == o) {
+        return true;
+      }
+      if (o == null || getClass() != o.getClass()) {
+        return false;
+      }
+      TestPatternAnnotationInResourceRequest request = (TestPatternAnnotationInResourceRequest) o;
+      return Objects.equals(integerValue, request.integerValue);
+    }
+    
+    @Override
+    public int hashCode() {
+      return Objects.hash(integerValue);
+    }
+  }
+  
+  @Test
+  public void testValidAnnotationInResource() throws Exception {
+    
+    class TestPatternAnnotationInResource {
+      @SuppressWarnings("unused")
+      public void test(@Valid TestPatternAnnotationInResourceRequest resource) {}
+    }
+    try { 
+      readParameters("{\"resource\":{\"integerValue\":2}}",
+            TestPatternAnnotationInResource.class.getDeclaredMethod("test", TestPatternAnnotationInResourceRequest.class), new TestPatternAnnotationInResource());
+      
+      fail("expected bad request exception");
+    } catch (BadRequestException ex) {
+      assertTrue("failed for unexpected reason: " + ex.getMessage(), ex.getMessage().contains("test.resource.integerValue must be greater than"));
+    }
   }
 
-  private Object[] readParameters(final String input, EndpointMethod method) throws Exception {
-    return readParameters(input, method, null, USER, APP_ENGINE_USER);
+  private Object[] readParameters(String input, Method method, Object service) throws Exception {
+    return readParameters(input, EndpointMethod.create(method.getDeclaringClass(), method), service);
+  }
+
+  private Object[] readParameters(final String input, EndpointMethod method, Object service) throws Exception {
+    return readParameters(input, method, null, USER, APP_ENGINE_USER, service);
   }
 
   private Object[] readParameters(final String input, EndpointMethod method,
       ApiMethodConfig methodConfig, final User user,
-      final com.google.appengine.api.users.User appEngineUser)
+      final com.google.appengine.api.users.User appEngineUser, Object service)
       throws Exception {
-    ParamReader reader = new ServletRequestParamReader(method, endpointsContext, context, null,
-        methodConfig) {
+    ParamReader reader = new ServletRequestParamReader(service, method, endpointsContext, context, null,
+        methodConfig, true) {
       @Override
       User getUser() {
         return user;
@@ -943,7 +1046,7 @@ public class ServletRequestParamReaderTest {
     Method method = TestEndpoint.class.getDeclaredMethod("getSimpleDate", SimpleDate.class);
     try {
       readParameters(
-          "{" + TestEndpoint.NAME_DATE_AND_TIME + ":\"" + simpleDateString + "\"}", method);
+          "{" + TestEndpoint.NAME_DATE_AND_TIME + ":\"" + simpleDateString + "\"}", method, new TestEndpoint());
       fail("Expected BadRequestException");
     } catch (BadRequestException expected) {}
   }

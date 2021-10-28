@@ -49,7 +49,8 @@ public class ServletInitializationParametersTest {
     assertThat(initParameters.isPrettyPrintEnabled()).isTrue();
     assertThat(initParameters.isAddContentLength()).isFalse();
     assertThat(initParameters.getApiExplorerUrlTemplate()).isNull();
-    verifyAsMap(initParameters, "", "true", "false", "true", "true", "false", null);
+    assertThat(initParameters.isParameterValidationEnabled()).isTrue();
+    verifyAsMap(initParameters, "", "true", "false", "true", "true", "false", null, "true");
   }
 
   @Test
@@ -62,13 +63,15 @@ public class ServletInitializationParametersTest {
         .setPrettyPrintEnabled(true)
         .setAddContentLength(true)
         .setApiExplorerUrlTemplate("apiExplorer")
+        .setParameterValidationEnabled(true)
         .build();
     assertThat(initParameters.getServiceClasses()).isEmpty();
     assertThat(initParameters.isClientIdWhitelistEnabled()).isTrue();
     assertThat(initParameters.isIllegalArgumentBackendError()).isTrue();
     assertThat(initParameters.isExceptionCompatibilityEnabled()).isTrue();
     assertThat(initParameters.getApiExplorerUrlTemplate()).isEqualTo("apiExplorer");
-    verifyAsMap(initParameters, "", "true", "true", "true", "true", "true", "apiExplorer");
+    assertThat(initParameters.isParameterValidationEnabled()).isTrue();
+    verifyAsMap(initParameters, "", "true", "true", "true", "true", "true", "apiExplorer", "true");
   }
 
   @Test
@@ -80,11 +83,12 @@ public class ServletInitializationParametersTest {
         .setExceptionCompatibilityEnabled(false)
         .setPrettyPrintEnabled(false)
         .setAddContentLength(false)
+        .setParameterValidationEnabled(false)
         .build();
     assertThat(initParameters.getServiceClasses()).containsExactly(String.class);
     assertThat(initParameters.isClientIdWhitelistEnabled()).isFalse();
     verifyAsMap(
-        initParameters, String.class.getName(), "false", "false", "false", "false","false", null);
+        initParameters, String.class.getName(), "false", "false", "false", "false","false", null, "false");
   }
 
   @Test
@@ -94,7 +98,7 @@ public class ServletInitializationParametersTest {
         .build();
     assertThat(initParameters.getServiceClasses()).containsExactly(String.class, Integer.class);
     verifyAsMap(initParameters, String.class.getName() + ',' + Integer.class.getName(), 
-        "true", "false", "true", "true", "false", null);
+        "true", "false", "true", "true", "false", null, "true");
   }
 
   @Test
@@ -108,43 +112,46 @@ public class ServletInitializationParametersTest {
   @Test
   public void testFromServletConfig_nullValues() throws ServletException {
     ServletInitializationParameters initParameters =
-        fromServletConfig(null, null, null, null, null, null, null);
+        fromServletConfig(null, null, null, null, null, null, null, null);
     assertThat(initParameters.getServiceClasses()).isEmpty();
     assertThat(initParameters.isClientIdWhitelistEnabled()).isTrue();
     assertThat(initParameters.isIllegalArgumentBackendError()).isFalse();
     assertThat(initParameters.isExceptionCompatibilityEnabled()).isTrue();
     assertThat(initParameters.isPrettyPrintEnabled()).isTrue();
+    assertThat(initParameters.isParameterValidationEnabled()).isTrue();
     assertThat(initParameters.getApiExplorerUrlTemplate()).isNull();
   }
 
   @Test
   public void testFromServletConfig_emptySetsAndFalse() throws ServletException {
     ServletInitializationParameters initParameters =
-        fromServletConfig("", "false", "false", "false", "false", "false", null);
+        fromServletConfig("", "false", "false", "false", "false", "false", null, "false");
     assertThat(initParameters.getServiceClasses()).isEmpty();
     assertThat(initParameters.isClientIdWhitelistEnabled()).isFalse();
     assertThat(initParameters.isIllegalArgumentBackendError()).isFalse();
     assertThat(initParameters.isExceptionCompatibilityEnabled()).isFalse();
     assertThat(initParameters.isPrettyPrintEnabled()).isFalse();
+    assertThat(initParameters.isParameterValidationEnabled()).isFalse();
     assertThat(initParameters.getApiExplorerUrlTemplate()).isNull();
   }
 
   @Test
   public void testFromServletConfig_oneEntrySetsAndTrue() throws ServletException {
     ServletInitializationParameters initParameters =
-        fromServletConfig(String.class.getName(), "true", "true", "true", "true", "true", null);
+        fromServletConfig(String.class.getName(), "true", "true", "true", "true", "true", null, "true");
     assertThat(initParameters.getServiceClasses()).containsExactly(String.class);
     assertThat(initParameters.isClientIdWhitelistEnabled()).isTrue();
     assertThat(initParameters.isIllegalArgumentBackendError()).isTrue();
     assertThat(initParameters.isExceptionCompatibilityEnabled()).isTrue();
     assertThat(initParameters.isPrettyPrintEnabled()).isTrue();
+    assertThat(initParameters.isParameterValidationEnabled()).isTrue();
     assertThat(initParameters.getApiExplorerUrlTemplate()).isNull();
   }
 
   @Test
   public void testFromServletConfig_twoEntrySets() throws ServletException {
     ServletInitializationParameters initParameters = fromServletConfig(
-        String.class.getName() + ',' + Integer.class.getName(), null, null, null, null, null, null);
+        String.class.getName() + ',' + Integer.class.getName(), null, null, null, null, null, null, null);
     assertThat(initParameters.getServiceClasses()).containsExactly(String.class, Integer.class);
   }
 
@@ -152,14 +159,14 @@ public class ServletInitializationParametersTest {
   public void testFromServletConfig_skipsEmptyElements() throws ServletException {
     ServletInitializationParameters initParameters = fromServletConfig(
         ",," + String.class.getName() + ",,," + Integer.class.getName() + ",", null, null,
-        null, null, null, null);
+        null, null, null, null, null);
     assertThat(initParameters.getServiceClasses()).containsExactly(String.class, Integer.class);
   }
 
   @Test
   public void testFromServletConfig_invalidBooleanThrows() throws ServletException {
     try {
-      fromServletConfig(null, "yes", null, null, null, null, null);
+      fromServletConfig(null, "yes", null, null, null, null, null, null);
       fail("Expected IllegalArgumentException");
     } catch (IllegalArgumentException expected) {
       // expected
@@ -170,15 +177,17 @@ public class ServletInitializationParametersTest {
       ServletInitializationParameters initParameters, String serviceClasses,
       String isClientIdWhitelistEnabled,
       String isIllegalArgumentBackendError, String isExceptionCompatibilityEnabled,
-      String isPrettyPrintEnabled, String isAddContentLength, String apiExplorerUrlTemplate) {
+      String isPrettyPrintEnabled, String isAddContentLength, String apiExplorerUrlTemplate,
+      String isParameterValidationEnabled) {
     Map<String, String> map = initParameters.asMap();
-    assertThat(map).hasSize(7);
+    assertThat(map).hasSize(8);
     assertThat(map.get("services")).isEqualTo(serviceClasses);
     assertThat(map.get("clientIdWhitelistEnabled")).isEqualTo(isClientIdWhitelistEnabled);
     assertThat(map.get("illegalArgumentIsBackendError")).isEqualTo(isIllegalArgumentBackendError);
     assertThat(map.get("enableExceptionCompatibility")).isEqualTo(isExceptionCompatibilityEnabled);
     assertThat(map.get("prettyPrint")).isEqualTo(isPrettyPrintEnabled);
     assertThat(map.get("addContentLength")).isEqualTo(isAddContentLength);
+    assertThat(map.get("enableParameterValidation")).isEqualTo(isParameterValidationEnabled);
     assertThat(map.get("apiExplorerUrlTemplate")).isEqualTo(apiExplorerUrlTemplate);
   }
 
@@ -186,11 +195,13 @@ public class ServletInitializationParametersTest {
       String serviceClasses,
       String isClientIdWhitelistEnabled, String isIllegalArgumentBackendError,
       String isExceptionCompatibilityEnabled, String isPrettyPrintEnabled,
-      String isAddContentLength, String apiExplorerUrlTemplate)
+      String isAddContentLength, String apiExplorerUrlTemplate,
+      String isParameterValidationEnabled)
       throws ServletException {
     ServletConfig servletConfig = new StubServletConfig(serviceClasses,
         isClientIdWhitelistEnabled, isIllegalArgumentBackendError,
-        isExceptionCompatibilityEnabled, isPrettyPrintEnabled, isAddContentLength, apiExplorerUrlTemplate);
+        isExceptionCompatibilityEnabled, isPrettyPrintEnabled, isAddContentLength, 
+        apiExplorerUrlTemplate, isParameterValidationEnabled);
     return ServletInitializationParameters.fromServletConfig(
             servletConfig, getClass().getClassLoader());
   }
@@ -201,7 +212,8 @@ public class ServletInitializationParametersTest {
     public StubServletConfig(
         String serviceClasses, String isClientIdWhitelistEnabled,
         String isIllegalArgumentBackendError, String isExceptionCompatibilityEnabled,
-        String isPrettyPrintEnabled, String isAddContentLength, String apiExplorerUrlTemplate) {
+        String isPrettyPrintEnabled, String isAddContentLength, String apiExplorerUrlTemplate,
+        String isParameterValidationEnabled) {
       initParameters = Maps.newHashMap();
       initParameters.put("services", serviceClasses);
       initParameters.put("clientIdWhitelistEnabled", isClientIdWhitelistEnabled);
@@ -210,6 +222,7 @@ public class ServletInitializationParametersTest {
       initParameters.put("prettyPrint", isPrettyPrintEnabled);
       initParameters.put("addContentLength", isAddContentLength);
       initParameters.put("apiExplorerUrlTemplate", apiExplorerUrlTemplate);
+      initParameters.put("enableParameterValidation", isParameterValidationEnabled);
     }
 
     @Override
