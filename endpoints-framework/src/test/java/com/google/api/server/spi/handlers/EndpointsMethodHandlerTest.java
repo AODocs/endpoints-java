@@ -152,7 +152,7 @@ public class EndpointsMethodHandlerTest {
     @Override
     @VisibleForTesting
     protected ParamReader createRestParamReader(EndpointsContext context,
-        ApiSerializationConfig serializationConfig, Object service) {
+        ApiSerializationConfig serializationConfig, Object apiService) {
       return new FakeParamReader(params);
     }
 

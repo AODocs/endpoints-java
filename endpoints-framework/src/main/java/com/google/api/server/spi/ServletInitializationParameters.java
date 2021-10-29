@@ -42,7 +42,7 @@ public abstract class ServletInitializationParameters {
   private static final String PRETTY_PRINT = "prettyPrint";
   private static final String ADD_CONTENT_LENGTH = "addContentLength";
   private static final String API_EXPLORER_URL_TEMPLATE = "apiExplorerUrlTemplate";
-  private static final String PARAMETER_VALIDATION = "enableParameterValidation";
+  private static final String PARAMETER_VALIDATION = "enableValidation";
 
   private static final Splitter CSV_SPLITTER = Splitter.on(',').omitEmptyStrings().trimResults();
   private static final Joiner CSV_JOINER = Joiner.on(',').skipNulls();

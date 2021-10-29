@@ -103,7 +103,7 @@ dependencies {
   annotationProcessor group: 'com.google.auto.value', name: 'auto-value', version: autoValueVersion
 
   api group: 'org.hibernate.validator', name: 'hibernate-validator', version: hibernateValidatorVersion
-  api group: 'javax.validation', name: 'validation-api', version: validationApiVersion
+  api group: 'jakarta.validation', name: 'jakarta.validation-api', version: validationApiVersion
 
   testImplementation project(':test-utils')
   testImplementation project(':discovery-client')

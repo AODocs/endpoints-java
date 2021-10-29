@@ -852,7 +852,7 @@ public class ServletRequestParamReaderTest {
           "{}", EndpointMethod.create(method.getDeclaringClass(), method),
           methodConfig,
           null,
-          null, 
+          null,
           new TestUser());
       fail("expected unauthorized method exception");
     } catch (UnauthorizedException ex) {
@@ -913,7 +913,7 @@ public class ServletRequestParamReaderTest {
                       TestPatternAnnotation.class.getDeclaredMethod("test", String.class), new TestPatternAnnotation());
       fail("expected bad request exception");
     } catch (BadRequestException ex) {
-      assertTrue("failed for unexpected reason: " + ex.getMessage(), ex.getMessage().contains("test.testParam must match"));
+      assertTrue("failed for unexpected reason: " + ex.getMessage(), ex.getMessage().contains("testParam must match"));
     }
   }
   
@@ -940,7 +940,7 @@ public class ServletRequestParamReaderTest {
               TestPatternAnnotation.class.getDeclaredMethod("test", String.class), new TestPatternAnnotation());
       fail("expected bad request exception");
     } catch (BadRequestException ex) {
-      assertTrue("failed for unexpected reason: " + ex.getMessage(), ex.getMessage().contains("test.testParam custom error message"));
+      assertTrue("failed for unexpected reason: " + ex.getMessage(), ex.getMessage().contains("testParam custom error message"));
     }
   }
   
@@ -995,7 +995,7 @@ public class ServletRequestParamReaderTest {
       
       fail("expected bad request exception");
     } catch (BadRequestException ex) {
-      assertTrue("failed for unexpected reason: " + ex.getMessage(), ex.getMessage().contains("test.resource.integerValue must be greater than"));
+      assertTrue("failed for unexpected reason: " + ex.getMessage(), ex.getMessage().contains("resource.integerValue must be greater than"));
     }
   }
 

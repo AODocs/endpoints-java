@@ -35,6 +35,7 @@ import com.google.api.server.spi.types.SimpleDate;
 import com.google.appengine.api.datastore.Blob;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
+import com.google.common.collect.Streams;
 import com.google.common.flogger.FluentLogger;
 import com.google.common.reflect.TypeToken;
 
@@ -53,6 +54,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.ConstraintViolation;
+import javax.validation.Path;
 import javax.validation.Validation;
 import javax.validation.Validator;
 
@@ -338,13 +340,13 @@ public class ServletRequestParamReader extends AbstractParamReader {
   protected final boolean validationEnabled;
 
   public ServletRequestParamReader(
-      Object service, EndpointMethod method,
+      Object apiService, EndpointMethod method,
       EndpointsContext endpointsContext,
       ServletContext servletContext,
       ApiSerializationConfig serializationConfig,
       ApiMethodConfig methodConfig,
       boolean validationEnabled) {
-    super(service, method);
+    super(apiService, method);
 
     this.methodConfig = methodConfig;
     this.endpointsContext = endpointsContext;
@@ -459,16 +461,25 @@ public class ServletRequestParamReader extends AbstractParamReader {
 
   protected Object[] validateParameters(Object[] parameterValues) throws BadRequestException {
     if (validationEnabled) {
-      Set<ConstraintViolation<Object>> constraintViolations = VALIDATOR.forExecutables().validateParameters(getService(), getMethod().getMethod(), parameterValues);
+      Set<ConstraintViolation<Object>> constraintViolations = VALIDATOR.forExecutables().validateParameters(getApiService(), getMethod().getMethod(), parameterValues);
       if (!constraintViolations.isEmpty()) {
-        List<String> errors = new ArrayList<>();
-        for (ConstraintViolation<Object> violation : constraintViolations) {
-          String error = violation.getPropertyPath().toString() + " " + violation.getMessage();
-          errors.add(error);
-        }
-        throw new BadRequestException("Invalid parameters : " + errors);
+        String errors = constraintViolations.stream()
+                .map(violation -> sanitizedPath(violation) + " " + violation.getMessage())
+                .collect(Collectors.joining(", "));
+        throw new BadRequestException("Invalid parameters: " + errors);
       }
     }
     return parameterValues;
+  }
+  
+  /**
+   * Skips useless and misleading method name (java name instead of API method name)
+   */
+  private static String sanitizedPath(ConstraintViolation<Object> violation) {
+    String path = Streams.stream(violation.getPropertyPath())
+            .map(Path.Node::getName)
+            .skip(1) 
+            .collect(Collectors.joining("."));
+    return path;
   }
 }

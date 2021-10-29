@@ -187,7 +187,7 @@ public class ServletInitializationParametersTest {
     assertThat(map.get("enableExceptionCompatibility")).isEqualTo(isExceptionCompatibilityEnabled);
     assertThat(map.get("prettyPrint")).isEqualTo(isPrettyPrintEnabled);
     assertThat(map.get("addContentLength")).isEqualTo(isAddContentLength);
-    assertThat(map.get("enableParameterValidation")).isEqualTo(isParameterValidationEnabled);
+    assertThat(map.get("enableValidation")).isEqualTo(isParameterValidationEnabled);
     assertThat(map.get("apiExplorerUrlTemplate")).isEqualTo(apiExplorerUrlTemplate);
   }
 
@@ -222,7 +222,7 @@ public class ServletInitializationParametersTest {
       initParameters.put("prettyPrint", isPrettyPrintEnabled);
       initParameters.put("addContentLength", isAddContentLength);
       initParameters.put("apiExplorerUrlTemplate", apiExplorerUrlTemplate);
-      initParameters.put("enableParameterValidation", isParameterValidationEnabled);
+      initParameters.put("enableValidation", isParameterValidationEnabled);
     }
 
     @Override

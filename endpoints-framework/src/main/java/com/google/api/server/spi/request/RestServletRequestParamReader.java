@@ -62,10 +62,10 @@ public class RestServletRequestParamReader extends ServletRequestParamReader {
   private final Map<String, String> rawPathParameters;
   private final Map<String, ApiParameterConfig> parameterConfigMap;
 
-  public RestServletRequestParamReader(Object service, EndpointMethod method,
+  public RestServletRequestParamReader(Object apiService, EndpointMethod method,
       EndpointsContext endpointsContext, ServletContext servletContext,
       ApiSerializationConfig serializationConfig, ApiMethodConfig methodConfig, boolean validationEnabled) {
-    super(service, method, endpointsContext, servletContext, serializationConfig, methodConfig, validationEnabled);
+    super(apiService, method, endpointsContext, servletContext, serializationConfig, methodConfig, validationEnabled);
     this.rawPathParameters = endpointsContext.getRawPathParameters();
     ImmutableMap.Builder<String, ApiParameterConfig> builder = ImmutableMap.builder();
     for (ApiParameterConfig config : methodConfig.getParameterConfigs()) {
