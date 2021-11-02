@@ -99,6 +99,7 @@ import io.swagger.models.properties.RefProperty;
 import io.swagger.models.properties.StringProperty;
 import io.swagger.models.refs.RefType;
 import java.lang.reflect.Type;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -483,6 +484,18 @@ public class SwaggerGenerator {
           String pattern = parameterConfig.getPattern();
           if (!Strings.isEmptyOrWhitespace(pattern)) {
             parameter.setPattern(pattern);
+          }
+          if (parameterConfig.getBoundaries() != null) {
+            if (parameterConfig.getBoundaries().getDecimalMin() != null) {
+              parameter.setMinimum(new BigDecimal(parameterConfig.getBoundaries().getDecimalMin()));
+            } else if (parameterConfig.getBoundaries().getMin() != null) {
+              parameter.setMinimum(new BigDecimal(parameterConfig.getBoundaries().getMin()));
+            }
+            if (parameterConfig.getBoundaries().getDecimalMax() != null) {
+              parameter.setMaximum(new BigDecimal(parameterConfig.getBoundaries().getDecimalMax()));
+            } else if (parameterConfig.getBoundaries().getMax() != null) {
+              parameter.setMaximum(new BigDecimal(parameterConfig.getBoundaries().getMax()));
+            }
           }
           boolean required = isPathParameter || (!parameterConfig.getNullable()
               && defaultValue == null);

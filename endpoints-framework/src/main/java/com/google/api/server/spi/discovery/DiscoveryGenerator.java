@@ -410,6 +410,18 @@ public class DiscoveryGenerator {
     if (parameterConfig.getPattern() != null) {
       schema.setPattern(parameterConfig.getPattern());
     }
+    if (parameterConfig.getBoundaries() != null) {
+      if (parameterConfig.getBoundaries().getDecimalMin() != null) {
+        schema.setMinimum(parameterConfig.getBoundaries().getDecimalMin());
+      } else if (parameterConfig.getBoundaries().getMin() != null) {
+        schema.setMinimum(parameterConfig.getBoundaries().getMin().toString());
+      }
+      if (parameterConfig.getBoundaries().getDecimalMax() != null) {
+        schema.setMaximum(parameterConfig.getBoundaries().getDecimalMax());
+      } else if (parameterConfig.getBoundaries().getMax() != null) {
+        schema.setMaximum(parameterConfig.getBoundaries().getMax().toString());
+      }
+    }
     return schema;
   }
 

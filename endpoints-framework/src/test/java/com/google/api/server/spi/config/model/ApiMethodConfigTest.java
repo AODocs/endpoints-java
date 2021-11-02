@@ -128,20 +128,20 @@ public class ApiMethodConfigTest {
 
   @Test
   public void addInjectedParameter_notInPath() {
-    methodConfig.addParameter("alt", null, false, null, TypeToken.of(String.class), null);
+    methodConfig.addParameter("alt", null, false, null, TypeToken.of(String.class), null, null);
     assertThat(methodConfig.getPath()).doesNotContain("{alt}");
   }
 
   @Test
   public void addPathParameter_appendsToCanonicalPath() {
-    methodConfig.addParameter("test", null, false, null, TypeToken.of(String.class), null);
+    methodConfig.addParameter("test", null, false, null, TypeToken.of(String.class), null, null);
     assertThat(methodConfig.getCanonicalPath()).contains("{test}");
   }
 
   @Test
   public void addPathParameter_doesNotAppendIfInPathAlready() {
     methodConfig.setPath("test/{test}");
-    methodConfig.addParameter("test", null, false, null, TypeToken.of(String.class), null);
+    methodConfig.addParameter("test", null, false, null, TypeToken.of(String.class), null, null);
     assertThat(methodConfig.getPath()).isEqualTo("test/{test}");
   }
 }

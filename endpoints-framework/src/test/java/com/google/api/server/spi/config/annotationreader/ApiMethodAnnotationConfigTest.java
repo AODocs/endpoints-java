@@ -103,7 +103,7 @@ public class ApiMethodAnnotationConfigTest {
   public void testAddParameter() {
     assertEquals(0, config.getParameterConfigs().size());
 
-    config.addParameter("bleh", "desc", false, null, TypeToken.of(String.class), "\\d{2}");
+    config.addParameter("bleh", "desc", false, null, TypeToken.of(String.class), "\\d{2}", null);
 
     assertEquals(1, config.getParameterConfigs().size());
     assertEquals("bleh", config.getParameterConfigs().get(0).getName());
@@ -120,12 +120,12 @@ public class ApiMethodAnnotationConfigTest {
   public void testAddParameter_nullableOrDefault() {
     assertEquals(0, config.getParameterConfigs().size());
 
-    config.addParameter("bleh", null, true, null, TypeToken.of(String.class), null);
+    config.addParameter("bleh", null, true, null, TypeToken.of(String.class), null, null);
     assertEquals(1, config.getParameterConfigs().size());
     assertEquals("bleh", config.getParameterConfigs().get(0).getName());
     assertEquals("overrideMethod1", config.getPath());
 
-    config.addParameter("foo", null, false, "42", TypeToken.of(String.class), null);
+    config.addParameter("foo", null, false, "42", TypeToken.of(String.class), null, null);
     assertEquals(2, config.getParameterConfigs().size());
     assertEquals("foo", config.getParameterConfigs().get(1).getName());
     assertEquals("overrideMethod1", config.getPath());

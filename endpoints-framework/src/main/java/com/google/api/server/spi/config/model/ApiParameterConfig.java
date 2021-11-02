@@ -36,6 +36,7 @@ public class ApiParameterConfig {
   private final String defaultValue;
   private final TypeToken<?> type;
   private final String pattern;
+  private final ApiParameterBoundaries boundaries;
 
   private Class<? extends Transformer<?, ?>> serializer;
   private Class<? extends Transformer<?, ?>> repeatedItemSerializer;
@@ -59,7 +60,8 @@ public class ApiParameterConfig {
   }
 
   public ApiParameterConfig(ApiMethodConfig apiMethodConfig, String name, String description,
-          boolean nullable, String defaultValue, TypeToken<?> type, TypeLoader typeLoader, String pattern) {
+          boolean nullable, String defaultValue, TypeToken<?> type, TypeLoader typeLoader, 
+          String pattern, ApiParameterBoundaries boundaries) {
     this.apiMethodConfig = apiMethodConfig;
     this.name = name;
     this.description = description;
@@ -70,6 +72,7 @@ public class ApiParameterConfig {
     this.repeatedItemSerializer = null;
     this.typeLoader = typeLoader;
     this.pattern = pattern;
+    this.boundaries = boundaries;
   }
 
   public ApiParameterConfig(ApiParameterConfig original, ApiMethodConfig apiMethodConfig) {
@@ -83,6 +86,7 @@ public class ApiParameterConfig {
     this.repeatedItemSerializer = original.repeatedItemSerializer;
     this.typeLoader = original.typeLoader;
     this.pattern = original.pattern;
+    this.boundaries = new ApiParameterBoundaries(original.boundaries);
   }
 
   @Override
@@ -98,7 +102,8 @@ public class ApiParameterConfig {
           && Objects.equals(serializer, parameter.serializer)
           && Objects.equals(repeatedItemSerializer, parameter.repeatedItemSerializer)
           && Objects.equals(typeLoader, parameter.typeLoader)
-          && Objects.equals(pattern, parameter.pattern);
+          && Objects.equals(pattern, parameter.pattern)
+          && Objects.equals(boundaries, parameter.boundaries);
     } else {
       return false;
     }
@@ -107,7 +112,7 @@ public class ApiParameterConfig {
   @Override
   public int hashCode() {
     return Objects.hash(name, nullable, defaultValue, type, serializer, repeatedItemSerializer,
-        typeLoader, pattern);
+        typeLoader, pattern, boundaries);
   }
 
   public ApiMethodConfig getApiMethodConfig() {
@@ -133,11 +138,15 @@ public class ApiParameterConfig {
   public TypeToken<?> getType() {
     return type;
   }
-  
+
   public String getPattern() {
     return pattern;
   }
-  
+
+  public ApiParameterBoundaries getBoundaries() {
+    return boundaries;
+  }
+
   /**
    * If the serialized type of the parameter is a repeated type, returns the individual item type.
    * Otherwise returns {@code null}.

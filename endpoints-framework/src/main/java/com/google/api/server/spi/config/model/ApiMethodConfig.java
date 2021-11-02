@@ -333,9 +333,9 @@ public class ApiMethodConfig {
    * it is non-optional and has no default.
    */
   public ApiParameterConfig addParameter(String name, String description, boolean nullable,
-          String defaultValue, TypeToken<?> type, String pattern) {
+		  String defaultValue, TypeToken<?> type, String pattern, ApiParameterBoundaries boundaries) {
     ApiParameterConfig config =
-        new ApiParameterConfig(this, name, description, nullable, defaultValue, type, typeLoader, pattern);
+        new ApiParameterConfig(this, name, description, nullable, defaultValue, type, typeLoader, pattern, boundaries);
     parameterConfigs.add(config);
 
     if (config.getClassification() != Classification.INJECTED && name != null && !nullable

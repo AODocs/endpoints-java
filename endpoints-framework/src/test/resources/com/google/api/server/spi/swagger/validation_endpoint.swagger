@@ -41,6 +41,23 @@
             "required": true,
             "type": "string",
             "pattern": "^[a-z]{2}$"
+          }, 
+          {
+            "name" : "minMaxParam",
+            "in" : "query",
+            "required" : true,
+            "type" : "integer",
+            "format" : "int64",
+            "minimum": 10,
+            "maximum": 20
+          }, {
+            "name" : "decimalMinMaxParam",
+            "in" : "query",
+            "required" : true,
+            "type" : "number",
+            "format" : "double",
+            "minimum": 2.3,
+            "maximum": 4
           }
         ],
         "responses": {

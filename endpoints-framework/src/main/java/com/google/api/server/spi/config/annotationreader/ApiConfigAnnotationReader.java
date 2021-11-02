@@ -31,6 +31,7 @@ import com.google.api.server.spi.config.model.ApiConfig;
 import com.google.api.server.spi.config.model.ApiIssuerAudienceConfig;
 import com.google.api.server.spi.config.model.ApiIssuerConfigs;
 import com.google.api.server.spi.config.model.ApiMethodConfig;
+import com.google.api.server.spi.config.model.ApiParameterBoundaries;
 import com.google.api.server.spi.config.model.ApiParameterConfig;
 import com.google.api.server.spi.config.model.ApiSerializationConfig;
 import com.google.common.collect.ImmutableList;
@@ -376,13 +377,22 @@ public class ApiConfigAnnotationReader implements ApiConfigSource {
           AnnotationUtil.getParameterAnnotation(method, i, annotationTypes.get("DefaultValue"));
       Annotation pattern =
               AnnotationUtil.getParameterAnnotation(method, i, annotationTypes.get("Pattern"));
+      Annotation min =
+              AnnotationUtil.getParameterAnnotation(method, i, annotationTypes.get("Min"));
+      Annotation max =
+              AnnotationUtil.getParameterAnnotation(method, i, annotationTypes.get("Max"));
+      Annotation decimalMin =
+              AnnotationUtil.getParameterAnnotation(method, i, annotationTypes.get("DecimalMin"));
+      Annotation decimalMax =
+              AnnotationUtil.getParameterAnnotation(method, i, annotationTypes.get("DecimalMax"));
       readMethodRequestParameter(methodConfig, parameterName, description, nullable, defaultValue,
-          parameterTypes[i], pattern);
+              parameterTypes[i], pattern, min, max, decimalMin, decimalMax);
     }
   }
 
   private void readMethodRequestParameter(ApiMethodConfig methodConfig, Annotation parameterName,
-          Annotation description, Annotation nullable, Annotation defaultValue, TypeToken<?> type, Annotation pattern)
+          Annotation description, Annotation nullable, Annotation defaultValue, TypeToken<?> type,
+          Annotation pattern, Annotation min, Annotation max, Annotation decimalMin, Annotation decimalMax)
       throws IllegalArgumentException, SecurityException, IllegalAccessException, 
       InvocationTargetException, NoSuchMethodException {
     String parameterNameString = null;
@@ -401,10 +411,27 @@ public class ApiConfigAnnotationReader implements ApiConfigSource {
     if (pattern != null) {
       patternString = getAnnotationProperty(pattern, "regexp");
     }
-
+    Long minLong = null;
+    if (min != null) {
+      minLong = getAnnotationProperty(min, "value");
+    }
+    Long maxLong = null;
+    if (max != null) {
+      maxLong = getAnnotationProperty(max, "value");
+    }
+    String decimalMinString = null;
+    if (decimalMin != null) {
+      decimalMinString = getAnnotationProperty(decimalMin, "value");
+    }
+    String decimalMaxString = null;
+    if (decimalMax != null) {
+      decimalMaxString = getAnnotationProperty(decimalMax, "value");
+    }
+  
+    ApiParameterBoundaries boundaries = new ApiParameterBoundaries(minLong, maxLong, decimalMinString, decimalMaxString);
     ApiParameterConfig parameterConfig =
         methodConfig.addParameter(parameterNameString, descriptionString, nullable != null, 
-            defaultValueString, type, patternString);
+            defaultValueString, type, patternString, boundaries);
 
     Annotation apiSerializer =
         type.getRawType().getAnnotation(annotationTypes.get("ApiTransformer"));

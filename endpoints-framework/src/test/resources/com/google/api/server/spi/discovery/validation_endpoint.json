@@ -25,6 +25,8 @@
       "id": "validation.create",
       "parameterOrder": [
         "pathParam",
+        "decimalMinMaxParam",
+        "minMaxParam",
         "queryParam"
       ],
       "parameters": {
@@ -39,7 +41,24 @@
           "required": true,
           "type": "string",
           "pattern": "^[a-z]{2}$"
+        },
+        "minMaxParam": {
+          "location": "query",
+          "required": true,
+          "type": "string",
+          "format" : "int64",
+          "minimum": "10",
+          "maximum": "20"
+        },
+        "decimalMinMaxParam": {
+          "location": "query",
+          "required": true,
+          "type": "number",
+          "format": "double",
+          "minimum": "2.3",
+          "maximum": "4"
         }
+        
       },
       "path": "{pathParam}",
       "scopes": [
