@@ -95,7 +95,9 @@ dependencies {
   compileOnly group: 'com.google.code.findbugs', name: 'jsr305', version: findbugsVersion
   api group: 'commons-fileupload', name: 'commons-fileupload', version: fileUploadVersion
   api group: 'io.swagger', name: 'swagger-models', version: swaggerVersion
-  api group: 'io.swagger', name: 'swagger-core', version: swaggerVersion
+  api(group: 'io.swagger', name: 'swagger-core', version: swaggerVersion) {
+    exclude group: 'javax.validation', module: 'validation-api'
+  }
   compileOnly group: 'org.slf4j', name: 'slf4j-nop', version: slf4jVersion
 
   api group: 'javax.servlet', name: 'servlet-api', version: servletVersion
