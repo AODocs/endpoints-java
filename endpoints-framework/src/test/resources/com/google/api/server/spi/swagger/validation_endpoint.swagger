@@ -1,0 +1,54 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "version": "1.0.0",
+    "title": "myapi.appspot.com"
+  },
+  "host": "myapi.appspot.com",
+  "basePath": "/_ah/api",
+  "tags": [
+    {
+      "name": "validation:v1"
+    }
+  ],
+  "schemes": [
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/validation/v1/{pathParam}": {
+      "post": {
+        "tags": [
+          "validation:v1"
+        ],
+        "operationId": "validation:v1.create",
+        "parameters": [
+          {
+            "name": "pathParam",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "pattern": "^\\d+$"
+          },
+          {
+            "name": "queryParam",
+            "in": "query",
+            "required": true,
+            "type": "string",
+            "pattern": "^[a-z]{2}$"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description" : "A successful response"
+          }
+        }
+      }
+    }
+  }
+}

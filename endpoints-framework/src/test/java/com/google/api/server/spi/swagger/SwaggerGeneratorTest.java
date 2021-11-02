@@ -58,6 +58,7 @@ import com.google.api.server.spi.testing.OptionalEndpoint;
 import com.google.api.server.spi.testing.RequiredPropertiesEndpoint;
 import com.google.api.server.spi.testing.SpecialCharsEndpoint;
 import com.google.api.server.spi.testing.ResponseStatusEndpoint;
+import com.google.api.server.spi.testing.ValidationEndpoint;
 import com.google.common.collect.ImmutableList;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -381,6 +382,13 @@ public class SwaggerGeneratorTest {
     Swagger swagger = generator.writeSwagger(ImmutableList.of(config), context
         .setExtractCommonParametersAsRefs(true));
     Swagger expected = readExpectedAsSwagger("special_chars.swagger");
+    checkSwagger(expected, swagger);
+  }
+  
+  @Test
+  public void testWriteSwagger_ValidationEndpoint() throws Exception {
+    Swagger swagger = getSwagger(ValidationEndpoint.class, new SwaggerContext());
+    Swagger expected = readExpectedAsSwagger("validation_endpoint.swagger");
     checkSwagger(expected, swagger);
   }
 

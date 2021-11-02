@@ -35,6 +35,7 @@ public class ApiParameterConfig {
   private final boolean nullable;
   private final String defaultValue;
   private final TypeToken<?> type;
+  private final String pattern;
 
   private Class<? extends Transformer<?, ?>> serializer;
   private Class<? extends Transformer<?, ?>> repeatedItemSerializer;
@@ -58,7 +59,7 @@ public class ApiParameterConfig {
   }
 
   public ApiParameterConfig(ApiMethodConfig apiMethodConfig, String name, String description,
-      boolean nullable, String defaultValue, TypeToken<?> type, TypeLoader typeLoader) {
+          boolean nullable, String defaultValue, TypeToken<?> type, TypeLoader typeLoader, String pattern) {
     this.apiMethodConfig = apiMethodConfig;
     this.name = name;
     this.description = description;
@@ -68,6 +69,7 @@ public class ApiParameterConfig {
     this.serializer = null;
     this.repeatedItemSerializer = null;
     this.typeLoader = typeLoader;
+    this.pattern = pattern;
   }
 
   public ApiParameterConfig(ApiParameterConfig original, ApiMethodConfig apiMethodConfig) {
@@ -80,6 +82,7 @@ public class ApiParameterConfig {
     this.serializer = original.serializer;
     this.repeatedItemSerializer = original.repeatedItemSerializer;
     this.typeLoader = original.typeLoader;
+    this.pattern = original.pattern;
   }
 
   @Override
@@ -94,7 +97,8 @@ public class ApiParameterConfig {
           && Objects.equals(type, parameter.type)
           && Objects.equals(serializer, parameter.serializer)
           && Objects.equals(repeatedItemSerializer, parameter.repeatedItemSerializer)
-          && Objects.equals(typeLoader, parameter.typeLoader);
+          && Objects.equals(typeLoader, parameter.typeLoader)
+          && Objects.equals(pattern, parameter.pattern);
     } else {
       return false;
     }
@@ -103,7 +107,7 @@ public class ApiParameterConfig {
   @Override
   public int hashCode() {
     return Objects.hash(name, nullable, defaultValue, type, serializer, repeatedItemSerializer,
-        typeLoader);
+        typeLoader, pattern);
   }
 
   public ApiMethodConfig getApiMethodConfig() {
@@ -129,7 +133,11 @@ public class ApiParameterConfig {
   public TypeToken<?> getType() {
     return type;
   }
-
+  
+  public String getPattern() {
+    return pattern;
+  }
+  
   /**
    * If the serialized type of the parameter is a repeated type, returns the individual item type.
    * Otherwise returns {@code null}.

@@ -87,9 +87,9 @@ public class ApiParameterConfigTest {
     Mockito.when(apiConfig.getSerializationConfig()).thenReturn(serializationConfig);
 
     config = new ApiParameterConfig(
-        apiMethodConfig, "bleh", null, false, null, TypeToken.of(String.class), typeLoader);
+        apiMethodConfig, "bleh", null, false, null, TypeToken.of(String.class), typeLoader, null);
     configWithArray = new ApiParameterConfig(
-        apiMethodConfig, "bleh", null, false, null, TypeToken.of(Boolean[].class), typeLoader);
+        apiMethodConfig, "bleh", null, false, null, TypeToken.of(Boolean[].class), typeLoader, null);
   }
 
   @Test
@@ -157,6 +157,6 @@ public class ApiParameterConfigTest {
 
   private ApiParameterConfig createStandardParameter(String name) {
     return new ApiParameterConfig(
-        apiMethodConfig, "alt", null, false, null, TypeToken.of(String.class), typeLoader);
+        apiMethodConfig, "alt", null, false, null, TypeToken.of(String.class), typeLoader, null);
   }
 }

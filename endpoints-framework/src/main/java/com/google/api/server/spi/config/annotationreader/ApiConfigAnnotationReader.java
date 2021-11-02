@@ -374,13 +374,15 @@ public class ApiConfigAnnotationReader implements ApiConfigSource {
           AnnotationUtil.getNullableParameter(method, i, annotationTypes.get("Nullable"));
       Annotation defaultValue =
           AnnotationUtil.getParameterAnnotation(method, i, annotationTypes.get("DefaultValue"));
+      Annotation pattern =
+              AnnotationUtil.getParameterAnnotation(method, i, annotationTypes.get("Pattern"));
       readMethodRequestParameter(methodConfig, parameterName, description, nullable, defaultValue,
-          parameterTypes[i]);
+          parameterTypes[i], pattern);
     }
   }
 
   private void readMethodRequestParameter(ApiMethodConfig methodConfig, Annotation parameterName,
-      Annotation description, Annotation nullable, Annotation defaultValue, TypeToken<?> type)
+          Annotation description, Annotation nullable, Annotation defaultValue, TypeToken<?> type, Annotation pattern)
       throws IllegalArgumentException, SecurityException, IllegalAccessException, 
       InvocationTargetException, NoSuchMethodException {
     String parameterNameString = null;
@@ -395,10 +397,14 @@ public class ApiConfigAnnotationReader implements ApiConfigSource {
     if (defaultValue != null) {
       defaultValueString = getAnnotationProperty(defaultValue, "value");
     }
+    String patternString = null;
+    if (pattern != null) {
+      patternString = getAnnotationProperty(pattern, "regexp");
+    }
 
     ApiParameterConfig parameterConfig =
         methodConfig.addParameter(parameterNameString, descriptionString, nullable != null, 
-            defaultValueString, type);
+            defaultValueString, type, patternString);
 
     Annotation apiSerializer =
         type.getRawType().getAnnotation(annotationTypes.get("ApiTransformer"));

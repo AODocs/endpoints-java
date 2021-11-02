@@ -191,6 +191,8 @@ public final class TypeLoader {
         loadAnnotation(classLoader, "com.google.api.server.spi.config.Named"));
     annotationTypes.put("Nullable",
         loadAnnotation(classLoader, "com.google.api.server.spi.config.Nullable"));
+    annotationTypes.put("Pattern",
+            loadAnnotation(classLoader, "javax.validation.constraints.Pattern"));
     return Collections.unmodifiableMap(annotationTypes);
   }
 

@@ -480,6 +480,10 @@ public class SwaggerGenerator {
           if (!Strings.isEmptyOrWhitespace(defaultValue)) {
             parameter.setDefaultValue(defaultValue);
           }
+          String pattern = parameterConfig.getPattern();
+          if (!Strings.isEmptyOrWhitespace(pattern)) {
+            parameter.setPattern(pattern);
+          }
           boolean required = isPathParameter || (!parameterConfig.getNullable()
               && defaultValue == null);
           if (parameterConfig.isRepeated()) {

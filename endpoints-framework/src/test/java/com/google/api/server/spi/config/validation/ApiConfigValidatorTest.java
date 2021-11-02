@@ -207,7 +207,7 @@ public class ApiConfigValidatorTest {
 
     config.getApiClassConfig().getMethods()
         .get(methodToEndpointMethod(TestEndpoint.class.getMethod("getResultNoParams")))
-        .addParameter("param", null, false, null, TypeToken.of(Integer.class))
+        .addParameter("param", null, false, null, TypeToken.of(Integer.class), null)
         .setSerializer(TestSerializer.class);
 
     try {
@@ -223,7 +223,7 @@ public class ApiConfigValidatorTest {
 
     config.getApiClassConfig().getMethods()
         .get(methodToEndpointMethod(TestEndpoint.class.getMethod("getResultNoParams")))
-        .addParameter("param", null, false, null, TypeToken.of(Integer[].class))
+        .addParameter("param", null, false, null, TypeToken.of(Integer[].class), null)
         .setRepeatedItemSerializer(TestSerializer.class);
 
     try {
@@ -271,7 +271,7 @@ public class ApiConfigValidatorTest {
 
     config.getApiClassConfig().getMethods()
         .get(methodToEndpointMethod(TestEndpoint.class.getMethod("getResultNoParams")))
-        .addParameter("param", null, false, null, TypeToken.of(Integer.class))
+        .addParameter("param", null, false, null, TypeToken.of(Integer.class), null)
         .setSerializer((Class<? extends Transformer<?, ?>>) (Class<?>) TestSerializer.class);
 
     try {
@@ -287,7 +287,7 @@ public class ApiConfigValidatorTest {
 
     config.getApiClassConfig().getMethods()
         .get(methodToEndpointMethod(TestEndpoint.class.getMethod("getResultNoParams")))
-        .addParameter("param", null, false, null, TypeToken.of(Integer[].class))
+        .addParameter("param", null, false, null, TypeToken.of(Integer[].class), null)
         .setRepeatedItemSerializer(
             (Class<? extends Transformer<?, ?>>) (Class<?>) TestSerializer.class);
 
@@ -308,7 +308,7 @@ public class ApiConfigValidatorTest {
         .get(methodToEndpointMethod(TestEndpoint.class.getMethod("getResultNoParams")))
         .addParameter("param", null, false, null,
             TypeToken.of(
-                Foo.class.getDeclaredMethod("foo", List.class).getGenericParameterTypes()[0]));
+                Foo.class.getDeclaredMethod("foo", List.class).getGenericParameterTypes()[0]), null);
 
     try {
       validator.validate(config);
@@ -327,7 +327,7 @@ public class ApiConfigValidatorTest {
         .get(methodToEndpointMethod(TestEndpoint.class.getMethod("getResultNoParams")))
         .addParameter("param", null, false, null,
             TypeToken.of(
-                Foo.class.getDeclaredMethod("foo", List[].class).getGenericParameterTypes()[0]));
+                Foo.class.getDeclaredMethod("foo", List[].class).getGenericParameterTypes()[0]), null);
 
     try {
       validator.validate(config);
@@ -346,7 +346,7 @@ public class ApiConfigValidatorTest {
         .get(methodToEndpointMethod(TestEndpoint.class.getMethod("getResultNoParams")))
         .addParameter("param", null, false, null,
             TypeToken.of(
-                Foo.class.getDeclaredMethod("foo", List.class).getGenericParameterTypes()[0]));
+                Foo.class.getDeclaredMethod("foo", List.class).getGenericParameterTypes()[0]), null);
 
     try {
       validator.validate(config);
@@ -359,7 +359,7 @@ public class ApiConfigValidatorTest {
   public void testArrayOfArraysParameter() throws Exception {
     config.getApiClassConfig().getMethods()
         .get(methodToEndpointMethod(TestEndpoint.class.getMethod("getResultNoParams")))
-        .addParameter("param", null, false, null, TypeToken.of(Integer[][].class));
+        .addParameter("param", null, false, null, TypeToken.of(Integer[][].class), null);
 
     try {
       validator.validate(config);
@@ -379,7 +379,7 @@ public class ApiConfigValidatorTest {
 
     config.getApiClassConfig().getMethods()
         .get(methodToEndpointMethod(TestEndpoint.class.getMethod("getResultNoParams")))
-        .addParameter("param", null, false, null, unknownType);
+        .addParameter("param", null, false, null, unknownType, null);
 
     try {
       validator.validate(config);

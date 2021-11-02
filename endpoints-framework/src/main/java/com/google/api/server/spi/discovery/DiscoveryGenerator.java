@@ -407,6 +407,9 @@ public class DiscoveryGenerator {
     if (parameterConfig.getDescription() != null) {
       schema.setDescription(parameterConfig.getDescription());
     }
+    if (parameterConfig.getPattern() != null) {
+      schema.setPattern(parameterConfig.getPattern());
+    }
     return schema;
   }
 

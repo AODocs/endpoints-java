@@ -46,6 +46,7 @@ import com.google.api.server.spi.testing.NonDiscoverableEndpoint;
 import com.google.api.server.spi.testing.OptionalEndpoint;
 import com.google.api.server.spi.testing.PrimitiveEndpoint;
 import com.google.api.server.spi.testing.RequiredPropertiesEndpoint;
+import com.google.api.server.spi.testing.ValidationEndpoint;
 import com.google.api.services.discovery.model.DirectoryList;
 import com.google.api.services.discovery.model.RestDescription;
 import com.google.common.collect.ImmutableList;
@@ -299,6 +300,13 @@ public class DiscoveryGeneratorTest {
     ApiConfig config = configLoader.loadConfiguration(ServiceContext.create(), FooEndpoint.class);
     DiscoveryGenerator.Result result = generator.writeDiscovery(ImmutableList.of(config), context);
     result.directory().clone();
+  }
+
+  @Test
+  public void testWriteDiscovery_ValidationEndpoint() throws Exception {
+    RestDescription doc = getDiscovery(new DiscoveryContext(), ValidationEndpoint.class);
+    RestDescription expected = readExpectedAsDiscovery("validation_endpoint.json");
+    compareDiscovery(expected, doc);
   }
 
   private RestDescription getDiscovery(DiscoveryContext context, Class<?> serviceClass)
