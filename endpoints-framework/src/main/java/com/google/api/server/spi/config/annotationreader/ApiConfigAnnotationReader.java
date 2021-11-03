@@ -420,15 +420,19 @@ public class ApiConfigAnnotationReader implements ApiConfigSource {
       maxLong = getAnnotationProperty(max, "value");
     }
     String decimalMinString = null;
+    Boolean decimalMinInclusive = null;
     if (decimalMin != null) {
       decimalMinString = getAnnotationProperty(decimalMin, "value");
+      decimalMinInclusive = getAnnotationProperty(decimalMin, "inclusive");
     }
     String decimalMaxString = null;
+    Boolean decimalMaxInclusive = null;
     if (decimalMax != null) {
       decimalMaxString = getAnnotationProperty(decimalMax, "value");
+      decimalMaxInclusive = getAnnotationProperty(decimalMax, "inclusive");
     }
   
-    ApiParameterBoundaries boundaries = new ApiParameterBoundaries(minLong, maxLong, decimalMinString, decimalMaxString);
+    ApiParameterBoundaries boundaries = new ApiParameterBoundaries(minLong, maxLong, decimalMinString, decimalMaxString, decimalMinInclusive, decimalMaxInclusive);
     ApiParameterConfig parameterConfig =
         methodConfig.addParameter(parameterNameString, descriptionString, nullable != null, 
             defaultValueString, type, patternString, boundaries);

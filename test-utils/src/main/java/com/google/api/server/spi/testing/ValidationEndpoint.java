@@ -32,6 +32,6 @@ public class ValidationEndpoint {
           @Named("pathParam") @Pattern(regexp = "^\\d+$") String pathParam, 
           @Named("queryParam") @Pattern(regexp = "^[a-z]{2}$") String queryParam,
           @Named("minMaxParam") @Min(10) @Max(20) Long minMaxParam,
-          @Named("decimalMinMaxParam") @DecimalMin(value = "2.3") @DecimalMax(value = "4") Double decimalMinMaxParam) {
+          @Named("decimalMinMaxParam") @DecimalMin(value = "2.3", inclusive = false) @DecimalMax(value = "4") Double decimalMinMaxParam) {
   }
 }

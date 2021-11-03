@@ -488,11 +488,13 @@ public class SwaggerGenerator {
           if (parameterConfig.getBoundaries() != null) {
             if (parameterConfig.getBoundaries().getDecimalMin() != null) {
               parameter.setMinimum(new BigDecimal(parameterConfig.getBoundaries().getDecimalMin()));
+              parameter.setExclusiveMinimum(!parameterConfig.getBoundaries().getDecimalMinInclusive());
             } else if (parameterConfig.getBoundaries().getMin() != null) {
               parameter.setMinimum(new BigDecimal(parameterConfig.getBoundaries().getMin()));
             }
             if (parameterConfig.getBoundaries().getDecimalMax() != null) {
               parameter.setMaximum(new BigDecimal(parameterConfig.getBoundaries().getDecimalMax()));
+              parameter.setExclusiveMaximum(!parameterConfig.getBoundaries().getDecimalMaxInclusive());
             } else if (parameterConfig.getBoundaries().getMax() != null) {
               parameter.setMaximum(new BigDecimal(parameterConfig.getBoundaries().getMax()));
             }

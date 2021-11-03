@@ -57,7 +57,9 @@
             "type" : "number",
             "format" : "double",
             "minimum": 2.3,
-            "maximum": 4
+            "exclusiveMinimum" : true,
+            "maximum": 4,
+            "exclusiveMaximum" : false
           }
         ],
         "responses": {
