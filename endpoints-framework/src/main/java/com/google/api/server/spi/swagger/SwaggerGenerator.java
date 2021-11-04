@@ -481,24 +481,25 @@ public class SwaggerGenerator {
           if (!Strings.isEmptyOrWhitespace(defaultValue)) {
             parameter.setDefaultValue(defaultValue);
           }
-          String pattern = parameterConfig.getPattern();
-          if (!Strings.isEmptyOrWhitespace(pattern)) {
-            parameter.setPattern(pattern);
-          }
-          if (parameterConfig.getBoundaries() != null) {
-            if (parameterConfig.getBoundaries().getDecimalMin() != null) {
-              parameter.setMinimum(new BigDecimal(parameterConfig.getBoundaries().getDecimalMin()));
-              parameter.setExclusiveMinimum(!parameterConfig.getBoundaries().getDecimalMinInclusive());
-            } else if (parameterConfig.getBoundaries().getMin() != null) {
-              parameter.setMinimum(new BigDecimal(parameterConfig.getBoundaries().getMin()));
+          Optional.ofNullable(parameterConfig.getValidationConstraints()).ifPresent(constraints -> {
+            String pattern = constraints.getPattern();
+            if (!Strings.isEmptyOrWhitespace(pattern)) {
+              parameter.setPattern(pattern);
             }
-            if (parameterConfig.getBoundaries().getDecimalMax() != null) {
-              parameter.setMaximum(new BigDecimal(parameterConfig.getBoundaries().getDecimalMax()));
-              parameter.setExclusiveMaximum(!parameterConfig.getBoundaries().getDecimalMaxInclusive());
-            } else if (parameterConfig.getBoundaries().getMax() != null) {
-              parameter.setMaximum(new BigDecimal(parameterConfig.getBoundaries().getMax()));
+            // DecimalMin/Max annotations take precedence over Min/Max
+            if (constraints.getDecimalMin() != null) {
+              parameter.setMinimum(new BigDecimal(constraints.getDecimalMin()));
+              parameter.setExclusiveMinimum(!constraints.getDecimalMinInclusive());
+            } else if (constraints.getMin() != null) {
+              parameter.setMinimum(new BigDecimal(constraints.getMin()));
             }
-          }
+            if (constraints.getDecimalMax() != null) {
+              parameter.setMaximum(new BigDecimal(constraints.getDecimalMax()));
+              parameter.setExclusiveMaximum(!constraints.getDecimalMaxInclusive());
+            } else if (constraints.getMax() != null) {
+              parameter.setMaximum(new BigDecimal(constraints.getMax()));
+            }
+          });
           boolean required = isPathParameter || (!parameterConfig.getNullable()
               && defaultValue == null);
           if (parameterConfig.isRepeated()) {

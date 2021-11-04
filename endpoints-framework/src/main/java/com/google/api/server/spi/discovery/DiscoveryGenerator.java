@@ -69,7 +69,10 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.TreeMap;
+import java.util.stream.Stream;
 
 /**
  * Generates discovery documents without contacting the discovery generator service.
@@ -407,21 +410,16 @@ public class DiscoveryGenerator {
     if (parameterConfig.getDescription() != null) {
       schema.setDescription(parameterConfig.getDescription());
     }
-    if (parameterConfig.getPattern() != null) {
-      schema.setPattern(parameterConfig.getPattern());
-    }
-    if (parameterConfig.getBoundaries() != null) {
-      if (parameterConfig.getBoundaries().getDecimalMin() != null) {
-        schema.setMinimum(parameterConfig.getBoundaries().getDecimalMin());
-      } else if (parameterConfig.getBoundaries().getMin() != null) {
-        schema.setMinimum(parameterConfig.getBoundaries().getMin().toString());
+    Optional.ofNullable(parameterConfig.getValidationConstraints()).ifPresent(constraints -> {
+      if (constraints.getPattern() != null) {
+        schema.setPattern(constraints.getPattern());
       }
-      if (parameterConfig.getBoundaries().getDecimalMax() != null) {
-        schema.setMaximum(parameterConfig.getBoundaries().getDecimalMax());
-      } else if (parameterConfig.getBoundaries().getMax() != null) {
-        schema.setMaximum(parameterConfig.getBoundaries().getMax().toString());
-      }
-    }
+      // DecimalMin/Max annotations take precedence over Min/Max
+      Stream.of(constraints.getDecimalMin(), constraints.getMin()).filter(Objects::nonNull)
+              .findFirst().map(Objects::toString).ifPresent(schema::setMinimum);
+      Stream.of(constraints.getDecimalMax(), constraints.getMax()).filter(Objects::nonNull)
+              .findFirst().map(Objects::toString).ifPresent(schema::setMaximum);
+    });
     return schema;
   }
 

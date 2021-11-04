@@ -35,8 +35,7 @@ public class ApiParameterConfig {
   private final boolean nullable;
   private final String defaultValue;
   private final TypeToken<?> type;
-  private final String pattern;
-  private final ApiParameterBoundaries boundaries;
+  private final ApiValidationConstraints validationConstraints;
 
   private Class<? extends Transformer<?, ?>> serializer;
   private Class<? extends Transformer<?, ?>> repeatedItemSerializer;
@@ -60,8 +59,8 @@ public class ApiParameterConfig {
   }
 
   public ApiParameterConfig(ApiMethodConfig apiMethodConfig, String name, String description,
-          boolean nullable, String defaultValue, TypeToken<?> type, TypeLoader typeLoader, 
-          String pattern, ApiParameterBoundaries boundaries) {
+          boolean nullable, String defaultValue, TypeToken<?> type, TypeLoader typeLoader,
+          ApiValidationConstraints validationConstraints) {
     this.apiMethodConfig = apiMethodConfig;
     this.name = name;
     this.description = description;
@@ -71,8 +70,7 @@ public class ApiParameterConfig {
     this.serializer = null;
     this.repeatedItemSerializer = null;
     this.typeLoader = typeLoader;
-    this.pattern = pattern;
-    this.boundaries = boundaries;
+    this.validationConstraints = validationConstraints;
   }
 
   public ApiParameterConfig(ApiParameterConfig original, ApiMethodConfig apiMethodConfig) {
@@ -85,8 +83,7 @@ public class ApiParameterConfig {
     this.serializer = original.serializer;
     this.repeatedItemSerializer = original.repeatedItemSerializer;
     this.typeLoader = original.typeLoader;
-    this.pattern = original.pattern;
-    this.boundaries = new ApiParameterBoundaries(original.boundaries);
+    this.validationConstraints = new ApiValidationConstraints(original.validationConstraints);
   }
 
   @Override
@@ -102,8 +99,7 @@ public class ApiParameterConfig {
           && Objects.equals(serializer, parameter.serializer)
           && Objects.equals(repeatedItemSerializer, parameter.repeatedItemSerializer)
           && Objects.equals(typeLoader, parameter.typeLoader)
-          && Objects.equals(pattern, parameter.pattern)
-          && Objects.equals(boundaries, parameter.boundaries);
+          && Objects.equals(validationConstraints, parameter.validationConstraints);
     } else {
       return false;
     }
@@ -112,7 +108,7 @@ public class ApiParameterConfig {
   @Override
   public int hashCode() {
     return Objects.hash(name, nullable, defaultValue, type, serializer, repeatedItemSerializer,
-        typeLoader, pattern, boundaries);
+        typeLoader, validationConstraints);
   }
 
   public ApiMethodConfig getApiMethodConfig() {
@@ -139,12 +135,8 @@ public class ApiParameterConfig {
     return type;
   }
 
-  public String getPattern() {
-    return pattern;
-  }
-
-  public ApiParameterBoundaries getBoundaries() {
-    return boundaries;
+  public ApiValidationConstraints getValidationConstraints() {
+    return validationConstraints;
   }
 
   /**

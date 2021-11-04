@@ -28,6 +28,7 @@ import com.google.api.server.spi.config.model.ApiClassConfig;
 import com.google.api.server.spi.config.model.ApiConfig;
 import com.google.api.server.spi.config.model.ApiMethodConfig;
 import com.google.api.server.spi.config.model.ApiSerializationConfig;
+import com.google.api.server.spi.config.model.ApiValidationConstraints;
 import com.google.api.server.spi.config.scope.AuthScopeExpression;
 import com.google.api.server.spi.config.scope.AuthScopeExpressions;
 import com.google.api.server.spi.testing.PassAuthenticator;
@@ -103,7 +104,8 @@ public class ApiMethodAnnotationConfigTest {
   public void testAddParameter() {
     assertEquals(0, config.getParameterConfigs().size());
 
-    config.addParameter("bleh", "desc", false, null, TypeToken.of(String.class), "\\d{2}", null);
+    ApiValidationConstraints validationConstraints = new ApiValidationConstraints("\\d{2}", 1L, 2L, "3.0", "4.0", true, false);
+    config.addParameter("bleh", "desc", false, null, TypeToken.of(String.class), validationConstraints);
 
     assertEquals(1, config.getParameterConfigs().size());
     assertEquals("bleh", config.getParameterConfigs().get(0).getName());
@@ -113,19 +115,26 @@ public class ApiMethodAnnotationConfigTest {
     assertEquals(
         TypeToken.of(String.class), config.getParameterConfigs().get(0).getSchemaBaseType());
     assertEquals("overrideMethod1/{bleh}", config.getPath());
-    assertEquals("\\d{2}", config.getParameterConfigs().get(0).getPattern());
+    ApiValidationConstraints actualValidationConstraints = config.getParameterConfigs().get(0).getValidationConstraints();
+    assertEquals("\\d{2}", actualValidationConstraints.getPattern());
+    assertEquals(new Long(1L), actualValidationConstraints.getMin());
+    assertEquals(new Long(2L), actualValidationConstraints.getMax());
+    assertEquals("3.0", actualValidationConstraints.getDecimalMin());
+    assertEquals("4.0", actualValidationConstraints.getDecimalMax());
+    assertEquals(Boolean.TRUE, actualValidationConstraints.getDecimalMinInclusive());
+    assertEquals(Boolean.FALSE, actualValidationConstraints.getDecimalMaxInclusive());
   }
 
   @Test
   public void testAddParameter_nullableOrDefault() {
     assertEquals(0, config.getParameterConfigs().size());
 
-    config.addParameter("bleh", null, true, null, TypeToken.of(String.class), null, null);
+    config.addParameter("bleh", null, true, null, TypeToken.of(String.class), null);
     assertEquals(1, config.getParameterConfigs().size());
     assertEquals("bleh", config.getParameterConfigs().get(0).getName());
     assertEquals("overrideMethod1", config.getPath());
 
-    config.addParameter("foo", null, false, "42", TypeToken.of(String.class), null, null);
+    config.addParameter("foo", null, false, "42", TypeToken.of(String.class), null);
     assertEquals(2, config.getParameterConfigs().size());
     assertEquals("foo", config.getParameterConfigs().get(1).getName());
     assertEquals("overrideMethod1", config.getPath());
