@@ -16,12 +16,15 @@
 package com.google.api.server.spi.request;
 
 import static com.google.common.truth.Truth.assertThat;
+
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 import com.google.api.server.spi.EndpointMethod;
 import com.google.api.server.spi.EndpointsContext;
 import com.google.api.server.spi.ServiceContext;
 import com.google.api.server.spi.ServiceException;
+import com.google.api.server.spi.ServletInitializationParameters;
 import com.google.api.server.spi.TypeLoader;
 import com.google.api.server.spi.config.Api;
 import com.google.api.server.spi.config.ApiMethod;
@@ -50,6 +53,7 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -338,6 +342,51 @@ public class RestServletRequestParamReaderTest {
   }
 
   @Test
+  public void contentTypeValidationEnabled_valid() throws Exception {
+    request.setContent("{\"objInt\":42}".getBytes(StandardCharsets.UTF_8));
+    request.setContentType("application/json");
+    endpointMethod = EndpointMethod.create(TestApi.class, TestApi.class.getMethod("testContentType", TestResource.class)); 
+    RestServletRequestParamReader reader = createReader(Collections.emptyMap(), ServletInitializationParameters.builder().setContentTypeValidationEnabled(true).build());
+
+    Object[] params = reader.read();
+    assertThat(params).hasLength(endpointMethod.getParameterClasses().length);
+    TestResource resource = (TestResource) params[0];
+    assertEquals(new Integer(42), resource.objInt);
+  }
+
+  @Test
+  public void contentTypeValidationEnabled_invalid() throws Exception {
+    try {
+      request.setContent("{\"objInt\":42}".getBytes(StandardCharsets.UTF_8));
+      request.setContentType("application/xml");
+      endpointMethod = EndpointMethod.create(TestApi.class, TestApi.class.getMethod("testContentType", TestResource.class));
+      RestServletRequestParamReader reader = createReader(Collections.emptyMap(), ServletInitializationParameters.builder().setContentTypeValidationEnabled(true).build());
+      
+      reader.read();
+      fail("expected ServiceException");
+    } catch (ServiceException e) {
+      assertEquals(406, e.getStatusCode());
+      assertThat(e.getMessage()).contains("Expecting application/json");
+    }
+  }
+
+  @Test
+  public void contentTypeValidationEnabled_empty() throws Exception {
+    try {
+      request.setContent("{\"objInt\":42}".getBytes(StandardCharsets.UTF_8));
+      request.setContentType(null);
+      endpointMethod = EndpointMethod.create(TestApi.class, TestApi.class.getMethod("testContentType", TestResource.class));
+      RestServletRequestParamReader reader = createReader(Collections.emptyMap(), ServletInitializationParameters.builder().setContentTypeValidationEnabled(true).build());
+      
+      reader.read();
+      fail("expected ServiceException");
+    } catch (ServiceException e) {
+      assertEquals(406, e.getStatusCode());
+      assertThat(e.getMessage()).contains("Expecting application/json");
+    }
+  }
+
+  @Test
   public void multipartFormData() throws Exception {
     endpointMethod = EndpointMethod.create(TestApi.class,
         TestApi.class.getMethod("testFormData", String.class, Integer.class));
@@ -361,13 +410,17 @@ public class RestServletRequestParamReaderTest {
     assertThat(params).asList()
         .containsExactly("test", 1234);
   }
-
+  
   private RestServletRequestParamReader createReader(Map<String, String> rawPathParameters) {
+    return createReader(rawPathParameters, ServletInitializationParameters.builder().build());
+  }
+
+  private RestServletRequestParamReader createReader(Map<String, String> rawPathParameters, ServletInitializationParameters initializationParameters) {
     EndpointsContext endpointsContext =
         new EndpointsContext("GET", "/", request, new MockHttpServletResponse(), true);
     endpointsContext.setRawPathParameters(rawPathParameters);
     return new RestServletRequestParamReader(service, endpointMethod, endpointsContext, null,
-        serializationConfig, methodConfig, true);
+        serializationConfig, methodConfig, initializationParameters);
   }
 
   private void checkContentParseError(String content, String location, String type, String details)
@@ -447,7 +500,14 @@ public class RestServletRequestParamReaderTest {
         path = "testArrayPathParam/{values}")
     public void testArrayPathParam(@Named("values") ArrayList<String> values) {
     }
-
+  
+    @ApiMethod(
+            name = "testContentType",
+            httpMethod = HttpMethod.POST,
+            path = "testContentType}")
+    public void testContentType(@Nullable TestResource input) {
+    }
+    
     @ApiMethod(
         name = "testFormData",
         httpMethod = HttpMethod.POST,

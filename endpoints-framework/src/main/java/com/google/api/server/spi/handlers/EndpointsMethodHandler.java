@@ -88,7 +88,7 @@ public class EndpointsMethodHandler {
   protected ParamReader createRestParamReader(EndpointsContext context,
       ApiSerializationConfig serializationConfig, Object apiService) {
     return new RestServletRequestParamReader(apiService, endpointMethod, context,
-        servletContext, serializationConfig, methodConfig, initParameters.isParameterValidationEnabled());
+        servletContext, serializationConfig, methodConfig, initParameters);
   }
 
   /**

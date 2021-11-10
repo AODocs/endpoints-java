@@ -43,6 +43,7 @@ public abstract class ServletInitializationParameters {
   private static final String ADD_CONTENT_LENGTH = "addContentLength";
   private static final String API_EXPLORER_URL_TEMPLATE = "apiExplorerUrlTemplate";
   private static final String PARAMETER_VALIDATION = "enableValidation";
+  private static final String CONTENT_TYPE_VALIDATION = "enableContentTypeValidation";
 
   private static final Splitter CSV_SPLITTER = Splitter.on(',').omitEmptyStrings().trimResults();
   private static final Joiner CSV_JOINER = Joiner.on(',').skipNulls();
@@ -87,11 +88,16 @@ public abstract class ServletInitializationParameters {
    *
    */
   public abstract boolean isAddContentLength();
-  
+
   /**
    * Returns whether the request parameter validation is enabled.
    */
   public abstract boolean isParameterValidationEnabled();
+
+  /**
+   * Returns whether the request content type validation is enabled.
+   */
+  public abstract boolean isContentTypeValidationEnabled();
   
   @Nullable
   public abstract String getApiExplorerUrlTemplate();
@@ -104,6 +110,7 @@ public abstract class ServletInitializationParameters {
         .setPrettyPrintEnabled(true)
         .setAddContentLength(false)
         .setParameterValidationEnabled(true)
+        .setContentTypeValidationEnabled(false)
         .setApiExplorerUrlTemplate(null);
   }
 
@@ -150,6 +157,11 @@ public abstract class ServletInitializationParameters {
      * Sets if request parameter validation should be enabled. Defaults to {@code true}.
      */
     public abstract Builder setParameterValidationEnabled(boolean enabledParameterValidation);
+  
+    /**
+     * Sets if request content type validation should be enabled. Defaults to {@code false}.
+     */
+    public abstract Builder setContentTypeValidationEnabled(boolean enabledContentTypeValidation);
 
     /**
      * Sets if pretty printing should be enabled for responses by default. Defaults to {@code true}.
@@ -223,6 +235,11 @@ public abstract class ServletInitializationParameters {
         builder.setParameterValidationEnabled(
                 parseBoolean(enabledParameterValidation, PARAMETER_VALIDATION));
       }
+      String enabledContentTypeValidation = config.getInitParameter(CONTENT_TYPE_VALIDATION);
+      if (enabledContentTypeValidation != null) {
+        builder.setContentTypeValidationEnabled(
+                parseBoolean(enabledContentTypeValidation, CONTENT_TYPE_VALIDATION));
+      }
       builder.setApiExplorerUrlTemplate(config.getInitParameter(API_EXPLORER_URL_TEMPLATE));
     }
     return builder.build();
@@ -260,6 +277,7 @@ public abstract class ServletInitializationParameters {
           put(PRETTY_PRINT, Boolean.toString(isPrettyPrintEnabled()));
           put(ADD_CONTENT_LENGTH, Boolean.toString(isAddContentLength()));
           put(PARAMETER_VALIDATION, Boolean.toString(isParameterValidationEnabled()));
+          put(CONTENT_TYPE_VALIDATION, Boolean.toString(isContentTypeValidationEnabled()));
           put(API_EXPLORER_URL_TEMPLATE, getApiExplorerUrlTemplate());
       }};
   }

@@ -20,6 +20,7 @@ import com.google.api.server.spi.EndpointMethod;
 import com.google.api.server.spi.EndpointsContext;
 import com.google.api.server.spi.IoUtil;
 import com.google.api.server.spi.ServiceException;
+import com.google.api.server.spi.ServletInitializationParameters;
 import com.google.api.server.spi.auth.common.User;
 import com.google.api.server.spi.config.AuthLevel;
 import com.google.api.server.spi.config.Named;
@@ -337,7 +338,7 @@ public class ServletRequestParamReader extends AbstractParamReader {
   private final ServletContext servletContext;
   protected final ObjectReader objectReader;
   protected final ApiMethodConfig methodConfig;
-  protected final boolean validationEnabled;
+  protected final ServletInitializationParameters initParameters;
 
   public ServletRequestParamReader(
       Object apiService, EndpointMethod method,
@@ -345,7 +346,7 @@ public class ServletRequestParamReader extends AbstractParamReader {
       ServletContext servletContext,
       ApiSerializationConfig serializationConfig,
       ApiMethodConfig methodConfig,
-      boolean validationEnabled) {
+      ServletInitializationParameters initParameters) {
     super(apiService, method);
 
     this.methodConfig = methodConfig;
@@ -361,7 +362,7 @@ public class ServletRequestParamReader extends AbstractParamReader {
         .build()
         .reader()
         .with(Base64Variants.MIME_NO_LINEFEEDS);
-    this.validationEnabled = validationEnabled;
+    this.initParameters = initParameters;
   }
 
   @Override
@@ -460,7 +461,7 @@ public class ServletRequestParamReader extends AbstractParamReader {
   }
 
   protected Object[] validateParameters(Object[] parameterValues) throws BadRequestException {
-    if (validationEnabled) {
+    if (initParameters.isParameterValidationEnabled()) {
       Set<ConstraintViolation<Object>> constraintViolations = VALIDATOR.forExecutables().validateParameters(getApiService(), getMethod().getMethod(), parameterValues);
       if (!constraintViolations.isEmpty()) {
         String errors = constraintViolations.stream()

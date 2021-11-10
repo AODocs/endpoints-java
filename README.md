@@ -33,9 +33,11 @@ inactive:
   - Allow [adding arbitrary data](https://github.com/AODocs/endpoints-java/pull/20) to generic errors
   - [Improve returned errors](https://github.com/AODocs/endpoints-java/pull/30) on malformed JSON
   - Validate request parameters/body through [Java bean validation](https://beanvalidation.org/) provided by [Hibernate validator](https://hibernate.org/validator/)
+  - Validate request content-type (must be enable through enableContentTypeValidation servlet parameter)
 - Discovery and Swagger
   - [Add description on resources and resource usage as request body](https://github.com/AODocs/endpoints-java/commit/bbb1eff2bb9e7d28fc2ec17599257d0ef610531d)
   - [Support declaring resource properties as required](https://github.com/AODocs/endpoints-java/pull/41)
+  - Support pattern, minimum/maximum attributes 
 - Swagger
   - Generated spec is [fully compatible](https://github.com/AODocs/endpoints-java/pull/34) with 
 [Cloud Endpoints Portal](https://cloud.google.com/endpoints/docs/frameworks/dev-portal-overview) (and is 100% valid Swagger spec)
@@ -43,6 +45,7 @@ inactive:
   - [New options](https://github.com/AODocs/endpoints-java/pull/37) to combine common parameters in same path, extract parameter refs at spec level, add error model description, customize spec title and description
   - [Add description support](https://github.com/AODocs/endpoints-java/pull/40/commits/bbb1eff2bb9e7d28fc2ec17599257d0ef610531d) for resource and resource usage
   - [Configurable naming templates](https://github.com/AODocs/endpoints-java/pull/42) for operationIds and tag names with better defaults
+  - Support exclusiveMinimum/exclusiveMaximum, minLength/maxLength and minItems/maxItems attributes
 
 Check 
 [closed PRs](https://github.com/AODocs/endpoints-java/pulls?q=is%3Apr+sort%3Aupdated-desc+is%3Aclosed)

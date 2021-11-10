@@ -25,6 +25,7 @@ import static org.mockito.Mockito.when;
 
 import com.google.api.server.spi.EndpointMethod;
 import com.google.api.server.spi.EndpointsContext;
+import com.google.api.server.spi.ServletInitializationParameters;
 import com.google.api.server.spi.auth.common.User;
 import com.google.api.server.spi.config.AuthLevel;
 import com.google.api.server.spi.config.Named;
@@ -673,7 +674,7 @@ public class ServletRequestParamReaderTest {
     Method method = TestUserEndpoint.class.getDeclaredMethod("user", TestUser.class);
     ParamReader reader = new ServletRequestParamReader(
             new TestUserEndpoint(), EndpointMethod.create(method.getDeclaringClass(), method), endpointsContext, context, null,
-        null, true) {
+        null, ServletInitializationParameters.builder().build()) {
       @Override
       User getUser() {
         return user;
@@ -1012,7 +1013,7 @@ public class ServletRequestParamReaderTest {
       final com.google.appengine.api.users.User appEngineUser, Object service)
       throws Exception {
     ParamReader reader = new ServletRequestParamReader(service, method, endpointsContext, context, null,
-        methodConfig, true) {
+        methodConfig, ServletInitializationParameters.builder().build()) {
       @Override
       User getUser() {
         return user;

@@ -20,6 +20,7 @@ import com.google.api.server.spi.EndpointMethod;
 import com.google.api.server.spi.EndpointsContext;
 import com.google.api.server.spi.IoUtil;
 import com.google.api.server.spi.ServiceException;
+import com.google.api.server.spi.ServletInitializationParameters;
 import com.google.api.server.spi.Strings;
 import com.google.api.server.spi.config.model.ApiMethodConfig;
 import com.google.api.server.spi.config.model.ApiParameterConfig;
@@ -44,6 +45,7 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -64,8 +66,8 @@ public class RestServletRequestParamReader extends ServletRequestParamReader {
 
   public RestServletRequestParamReader(Object apiService, EndpointMethod method,
       EndpointsContext endpointsContext, ServletContext servletContext,
-      ApiSerializationConfig serializationConfig, ApiMethodConfig methodConfig, boolean validationEnabled) {
-    super(apiService, method, endpointsContext, servletContext, serializationConfig, methodConfig, validationEnabled);
+      ApiSerializationConfig serializationConfig, ApiMethodConfig methodConfig, ServletInitializationParameters initializationParameters) {
+    super(apiService, method, endpointsContext, servletContext, serializationConfig, methodConfig, initializationParameters);
     this.rawPathParameters = endpointsContext.getRawPathParameters();
     ImmutableMap.Builder<String, ApiParameterConfig> builder = ImmutableMap.builder();
     for (ApiParameterConfig config : methodConfig.getParameterConfigs()) {
@@ -114,6 +116,7 @@ public class RestServletRequestParamReader extends ServletRequestParamReader {
         // path and query parameters being injected into the body), bodies are optional here, so we
         // create an empty body and inject named parameters to make deserialize work.
         if (!Strings.isEmptyOrWhitespace(requestBody)) {
+          validateRequestContentType(servletRequest);
           JsonNode node = objectReader.readTree(requestBody);
           if (!node.isObject()) {
             throw new BadRequestException("expected a JSON object body");
@@ -165,6 +168,16 @@ public class RestServletRequestParamReader extends ServletRequestParamReader {
         | IOException e) {
       logger.atInfo().withCause(e).log("Unable to read request parameter(s)");
       throw new BadRequestException("Parse error", "parseError", e);
+    }
+  }
+  
+  private void validateRequestContentType(HttpServletRequest httpServletRequest) throws ServiceException {
+    if (!initParameters.isContentTypeValidationEnabled()) {
+      return;
+    }
+    String contentType = httpServletRequest.getContentType();
+    if (Objects.isNull(contentType) || !contentType.contains("application/json")) {
+      throw new ServiceException(406, "Expecting application/json content-type.");
     }
   }
 
