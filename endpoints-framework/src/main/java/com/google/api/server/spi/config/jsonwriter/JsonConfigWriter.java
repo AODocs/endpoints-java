@@ -75,18 +75,19 @@ public class JsonConfigWriter implements ApiConfigWriter {
 
   private final TypeLoader typeLoader;
   private final ApiConfigValidator validator;
-
-  private final ResourceSchemaProvider resourceSchemaProvider = new JacksonResourceSchemaProvider();
+  private final ResourceSchemaProvider resourceSchemaProvider;
 
   public JsonConfigWriter() throws ClassNotFoundException {
     this.typeLoader = new TypeLoader(JsonConfigWriter.class.getClassLoader());
     this.validator = new ApiConfigValidator(typeLoader, new SchemaRepository(typeLoader));
+    this.resourceSchemaProvider = new JacksonResourceSchemaProvider(typeLoader);
   }
 
   public JsonConfigWriter(TypeLoader typeLoader, ApiConfigValidator validator)
       throws ClassNotFoundException {
     this.typeLoader = typeLoader;
     this.validator = validator;
+    this.resourceSchemaProvider = new JacksonResourceSchemaProvider(typeLoader);
   }
 
   private static final ObjectMapper objectMapper = ObjectMapperUtil.createStandardObjectMapper();

@@ -82,11 +82,14 @@ import io.swagger.models.parameters.Parameter;
 import io.swagger.models.parameters.PathParameter;
 import io.swagger.models.parameters.QueryParameter;
 import io.swagger.models.parameters.RefParameter;
+import io.swagger.models.properties.AbstractNumericProperty;
 import io.swagger.models.properties.ArrayProperty;
+import io.swagger.models.properties.BaseIntegerProperty;
 import io.swagger.models.properties.BooleanProperty;
 import io.swagger.models.properties.ByteArrayProperty;
 import io.swagger.models.properties.DateProperty;
 import io.swagger.models.properties.DateTimeProperty;
+import io.swagger.models.properties.DecimalProperty;
 import io.swagger.models.properties.DoubleProperty;
 import io.swagger.models.properties.FloatProperty;
 import io.swagger.models.properties.IntegerProperty;
@@ -738,6 +741,36 @@ public class SwaggerGenerator {
       p.description(f.description());
       if (f.required() != null) {
         p.setRequired(f.required());
+      }
+      if (f.constraints() != null) {
+        if (p instanceof StringProperty) {
+          ((StringProperty) p).setPattern(f.constraints().pattern());
+          ((StringProperty) p).setMinLength(f.constraints().minSize());
+          ((StringProperty) p).setMaxLength(f.constraints().maxSize());
+        } else if (p instanceof BaseIntegerProperty) {
+          if (f.constraints().min() != null) {
+            ((BaseIntegerProperty) p).setMinimum(BigDecimal.valueOf(f.constraints().min()));
+          }
+          if (f.constraints().max() != null) {
+            ((BaseIntegerProperty) p).setMaximum(BigDecimal.valueOf(f.constraints().max()));
+          }
+        } else if (p instanceof DecimalProperty) {
+          if (f.constraints().decimalMin() != null) {
+            ((DecimalProperty) p).setMinimum(new BigDecimal(f.constraints().decimalMin()));
+            ((DecimalProperty) p).setExclusiveMinimum(!f.constraints().decimalMinInclusive());
+          }
+          if (f.constraints().decimalMax() != null) {
+            ((DecimalProperty) p).setMaximum(new BigDecimal(f.constraints().decimalMax()));
+            ((DecimalProperty) p).setExclusiveMaximum(!f.constraints().decimalMaxInclusive());
+          }
+        } else if (p instanceof ArrayProperty) {
+          if (f.constraints().minSize() != null && f.constraints().minSize() > 0) {
+            ((ArrayProperty) p).setMinItems(f.constraints().minSize());
+          }
+          if (f.constraints().maxSize() != null &&  f.constraints().maxSize() < Integer.MAX_VALUE) {
+            ((ArrayProperty) p).setMaxItems(f.constraints().maxSize());
+          }
+        }
       }
     }
     return p;

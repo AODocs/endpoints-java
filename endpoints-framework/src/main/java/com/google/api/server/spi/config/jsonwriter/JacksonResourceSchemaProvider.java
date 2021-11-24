@@ -17,10 +17,14 @@ package com.google.api.server.spi.config.jsonwriter;
 
 import com.google.api.client.util.ClassInfo;
 import com.google.api.server.spi.ObjectMapperUtil;
+import com.google.api.server.spi.TypeLoader;
 import com.google.api.server.spi.config.ResourcePropertySchema;
 import com.google.api.server.spi.config.ResourceSchema;
 import com.google.api.server.spi.config.annotationreader.ApiAnnotationIntrospector;
+import com.google.api.server.spi.config.annotationreader.ApiConfigAnnotationReader;
+import com.google.api.server.spi.config.annotationreader.ApiConfigAnnotations;
 import com.google.api.server.spi.config.model.ApiConfig;
+import com.google.api.server.spi.config.model.ApiValidationConstraints;
 import com.google.api.server.spi.config.model.Types;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.flogger.FluentLogger;
@@ -33,6 +37,7 @@ import com.fasterxml.jackson.databind.introspect.AnnotatedField;
 import com.fasterxml.jackson.databind.introspect.AnnotatedMethod;
 import com.fasterxml.jackson.databind.introspect.BeanPropertyDefinition;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -47,6 +52,15 @@ public class JacksonResourceSchemaProvider extends AbstractResourceSchemaProvide
 
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
+  private final TypeLoader typeLoader;
+  private final ApiConfigAnnotationReader annotationReader;
+
+  public JacksonResourceSchemaProvider(TypeLoader typeLoader) {
+    super();
+    this.typeLoader = typeLoader;
+    this.annotationReader = new ApiConfigAnnotationReader(typeLoader.getAnnotationTypes());
+  }
+  
   @Override
   public ResourceSchema getResourceSchema(TypeToken<?> type, ApiConfig config) {
     ResourceSchema schema = super.getResourceSchema(type, config);
@@ -73,6 +87,7 @@ public class JacksonResourceSchemaProvider extends AbstractResourceSchemaProvide
           ResourcePropertySchema propertySchema = ResourcePropertySchema.of(propertyType);
           propertySchema.setDescription(definition.getMetadata().getDescription());
           propertySchema.setRequired(definition.getMetadata().getRequired());
+          propertySchema.setValidationConstraints(extractValidationConstraints(definition));
           schemaBuilder.addProperty(name, propertySchema);
         } else {
           logger.atWarning().log("No type found for property '%s' on class '%s'.", name, type);
@@ -83,6 +98,18 @@ public class JacksonResourceSchemaProvider extends AbstractResourceSchemaProvide
       }
     }
     return schemaBuilder.build();
+  }
+
+  private ApiValidationConstraints extractValidationConstraints(BeanPropertyDefinition definition) {
+    if (definition.getField() == null) {
+      return null;
+    }
+    ApiConfigAnnotations configAnnotations = new ApiConfigAnnotations(definition.getField().getAnnotated(), typeLoader.getAnnotationTypes());
+    try {
+      return annotationReader.buildApiValidationConstraints(configAnnotations);
+    } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+      throw new IllegalStateException(e);
+    }
   }
 
   private static Set<String> getGenericDataFieldNames(TypeToken<?> type) {

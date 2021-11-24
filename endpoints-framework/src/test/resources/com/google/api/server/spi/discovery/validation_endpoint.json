@@ -73,6 +73,10 @@
         }
       },
       "path": "{pathParam}",
+      "request" : {
+        "$ref" : "ValidationBean",
+        "parameterName" : "resource"
+      },
       "scopes": [
         "https://www.googleapis.com/auth/userinfo.email"
       ]
@@ -126,6 +130,36 @@
   },
   "protocol": "rest",
   "rootUrl": "https://myapi.appspot.com/_ah/api/",
+  "schemas" : {
+    "ValidationBean" : {
+      "id" : "ValidationBean",
+      "properties" : {
+        "arrayTest" : {
+          "items" : {
+            "type" : "string"
+          },
+          "type" : "array"
+        },
+        "decimalMinMaxTest" : {
+          "format" : "double",
+          "type" : "number",
+          "minimum": "3.4",
+          "maximum": "4.5"
+        },
+        "minMaxTest" : {
+          "format" : "int64",
+          "type" : "string",
+          "minimum": "2",
+          "maximum": "6"
+        },
+        "myPatternTest" : {
+          "type" : "string",
+          "pattern": "^[0-9]{2}$"
+        }
+      },
+      "type" : "object"
+    }
+  },
   "servicePath": "validation/v1/",
   "version": "v1"
 }

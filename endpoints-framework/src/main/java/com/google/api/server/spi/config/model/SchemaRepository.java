@@ -61,12 +61,13 @@ public class SchemaRepository {
   private final Multimap<ApiKey, Schema> schemaByApiKeys = LinkedHashMultimap.create();
   private final Map<ApiSerializationConfig, Map<TypeToken<?>, Schema>> types 
       = Maps.newLinkedHashMap();
-  private final ResourceSchemaProvider resourceSchemaProvider = new JacksonResourceSchemaProvider();
+  private final ResourceSchemaProvider resourceSchemaProvider;
 
   private final TypeLoader typeLoader;
 
   public SchemaRepository(TypeLoader typeLoader) {
     this.typeLoader = typeLoader;
+    this.resourceSchemaProvider = new JacksonResourceSchemaProvider(typeLoader);
   }
 
   /**
@@ -283,14 +284,33 @@ public class SchemaRepository {
         Field.Builder fieldBuilder = Field.builder()
             .setName(propertyName)
             .setDescription(Strings.isNullOrEmpty(description) ? null : description)
-            .setRequired(propertySchema.getRequired());
+            .setRequired(propertySchema.getRequired())
+            .setConstraints(toFieldConstraints(propertySchema.getValidationConstraints()));
         fillInFieldInformation(fieldBuilder, propertyType, typesForConfig, config);
         builder.addField(propertyName, fieldBuilder.build());
       }
     }
     return builder.build();
   }
-
+  
+  private Schema.FieldConstraints toFieldConstraints(ApiValidationConstraints validationConstraints) {
+    Schema.FieldConstraints constraints = null;
+    if (validationConstraints != null && !validationConstraints.isEmpty()) {
+       constraints = Schema.FieldConstraints.builder()
+              .setPattern(validationConstraints.getPattern())
+              .setMin(validationConstraints.getMin())
+              .setMax(validationConstraints.getMax())
+              .setDecimalMin(validationConstraints.getDecimalMin())
+              .setDecimalMax(validationConstraints.getDecimalMax())
+              .setDecimalMinInclusive(validationConstraints.getDecimalMinInclusive())
+              .setDecimalMaxInclusive(validationConstraints.getDecimalMaxInclusive())
+              .setMinSize(validationConstraints.getMinSize())
+              .setMaxSize(validationConstraints.getMaxSize())
+              .build();
+      }
+    return constraints;
+  }
+  
   private Schema createEnumSchema(TypeToken<?> type, ApiConfig config) {
     Map<String, String> valuesAndDescriptions
             = Types.getEnumValuesAndDescriptions((TypeToken<Enum<?>>) type);

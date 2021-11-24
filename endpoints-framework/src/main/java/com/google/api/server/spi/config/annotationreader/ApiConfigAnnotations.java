@@ -5,10 +5,11 @@ import static com.google.api.server.spi.config.annotationreader.AnnotationUtil.g
 import static com.google.api.server.spi.config.annotationreader.AnnotationUtil.getParameterAnnotation;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
 import java.util.Map;
 
-final class ApiConfigAnnotations {
+public final class ApiConfigAnnotations {
 	
 	private Annotation parameterName;
 	private Annotation description;
@@ -32,6 +33,19 @@ final class ApiConfigAnnotations {
 		this.decimalMin = getParameterAnnotation(method, parameterIndex, annotationTypes.get("DecimalMin"));
 		this.decimalMax = getParameterAnnotation(method, parameterIndex, annotationTypes.get("DecimalMax"));
 		this.size = getParameterAnnotation(method, parameterIndex, annotationTypes.get("Size"));
+	}
+	
+	public ApiConfigAnnotations(AnnotatedElement annotatedElement, Map<String, Class<? extends Annotation>> annotationTypes) {
+		this.parameterName = annotatedElement.getAnnotation(annotationTypes.get("Named"));
+		this.description = annotatedElement.getAnnotation(annotationTypes.get("Description"));
+		this.nullable = annotatedElement.getAnnotation(annotationTypes.get("Nullable"));
+		this.defaultValue = annotatedElement.getAnnotation(annotationTypes.get("DefaultValue"));
+		this.pattern = annotatedElement.getAnnotation(annotationTypes.get("Pattern"));
+		this.min = annotatedElement.getAnnotation(annotationTypes.get("Min"));
+		this.max = annotatedElement.getAnnotation(annotationTypes.get("Max"));
+		this.decimalMin = annotatedElement.getAnnotation(annotationTypes.get("DecimalMin"));
+		this.decimalMax = annotatedElement.getAnnotation(annotationTypes.get("DecimalMax"));
+		this.size = annotatedElement.getAnnotation(annotationTypes.get("Size"));
 	}
 	
 	public Annotation getParameterName() {

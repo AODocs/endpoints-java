@@ -98,6 +98,10 @@ public abstract class Schema {
      * If {@link type()} is {@link FieldType#ARRAY}, a reference to the array item type.
      */
     @Nullable public abstract Field arrayItemSchema();
+  
+    /** The validation constraints of the field. */
+    @Nullable public abstract FieldConstraints constraints();
+    
     public static Builder builder() {
       return new AutoValue_Schema_Field.Builder();
     }
@@ -113,7 +117,50 @@ public abstract class Schema {
       public abstract Builder setRequired(Boolean required);
       public abstract Builder setSchemaReference(SchemaReference ref);
       public abstract Builder setArrayItemSchema(Field schema);
+      public abstract Builder setConstraints(FieldConstraints constraints);
       public abstract Field build();
+    }
+  }
+
+  /**
+   * Representation of a field in a JSON object.
+   */
+  @AutoValue
+  public static abstract class FieldConstraints {
+
+    @Nullable public abstract String pattern();
+  
+    @Nullable public abstract Long min();
+    @Nullable public abstract Long max();
+  
+    @Nullable public abstract String decimalMin();
+    @Nullable public abstract String decimalMax();
+  
+    @Nullable public abstract Boolean decimalMinInclusive();
+    @Nullable public abstract Boolean decimalMaxInclusive();
+  
+    @Nullable public abstract Integer minSize();
+    @Nullable public abstract Integer maxSize();
+    
+    public static Builder builder() {
+      return new AutoValue_Schema_FieldConstraints.Builder();
+    }
+    
+    /**
+     * A {@link FieldConstraints} builder.
+     */
+    @AutoValue.Builder
+    public abstract static class Builder {
+      public abstract Builder setPattern(String pattern);
+      public abstract Builder setMin(Long min);
+      public abstract Builder setMax(Long max);
+      public abstract Builder setDecimalMin(String decimalMin);
+      public abstract Builder setDecimalMax(String decimalMax);
+      public abstract Builder setDecimalMinInclusive(Boolean decimalMinInclusive);
+      public abstract Builder setDecimalMaxInclusive(Boolean decimalMaxInclusive);
+      public abstract Builder setMinSize(Integer minSize);
+      public abstract Builder setMaxSize(Integer maxSize);
+      public abstract FieldConstraints build();
     }
   }
 
