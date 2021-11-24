@@ -61,6 +61,8 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimaps;
 import com.google.common.reflect.TypeToken;
+
+import java.math.BigDecimal;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -73,6 +75,11 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.TreeMap;
 import java.util.stream.Stream;
+
+import io.swagger.models.properties.ArrayProperty;
+import io.swagger.models.properties.BaseIntegerProperty;
+import io.swagger.models.properties.DecimalProperty;
+import io.swagger.models.properties.StringProperty;
 
 /**
  * Generates discovery documents without contacting the discovery generator service.
@@ -288,6 +295,15 @@ public class DiscoveryGenerator {
     if (f.type() == FieldType.ARRAY) {
       fieldSchema.setItems(convertToDiscoverySchema(f.arrayItemSchema()));
     }
+    
+    Optional.ofNullable(f.constraints()).ifPresent(constraints -> {
+      fieldSchema.setPattern(constraints.pattern());
+      // DecimalMin/Max annotations take precedence over Min/Max
+      Stream.of(constraints.decimalMin(), constraints.min()).filter(Objects::nonNull)
+              .findFirst().map(Objects::toString).ifPresent(fieldSchema::setMinimum);
+      Stream.of(constraints.decimalMax(), constraints.max()).filter(Objects::nonNull)
+              .findFirst().map(Objects::toString).ifPresent(fieldSchema::setMaximum);
+    });
     return fieldSchema;
   }
 

@@ -17,6 +17,7 @@ package com.google.api.server.spi.testing;
 
 import java.util.List;
 
+import javax.validation.Valid;
 import javax.validation.constraints.DecimalMax;
 import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.Max;
@@ -30,13 +31,15 @@ import com.google.api.server.spi.config.Named;
 
 @Api(name = "validation", version = "v1")
 public class ValidationEndpoint {
-  @ApiMethod(name = "create", path = "{pathParam}")
+  @ApiMethod(name = "create", path = "{pathParam}", httpMethod = "POST")
   public void create(
           @Named("pathParam") @Pattern(regexp = "^\\d+$") String pathParam, 
           @Named("queryParam") @Pattern(regexp = "^[a-z]{2}$") String queryParam,
           @Named("minMaxParam") @Min(10) @Max(20) Long minMaxParam,
           @Named("decimalMinMaxParam") @DecimalMin(value = "2.3", inclusive = false) @DecimalMax(value = "4") Double decimalMinMaxParam,
           @Named("sizeParam") @Size(min = 3, max = 6) String sizeParam,
-          @Named("arraySizeParam") @Size(min = 2, max = 3) List<String> arraySizeParam) {
+          @Named("arraySizeParam") @Size(min = 2, max = 3) List<String> arraySizeParam,
+          @Valid ValidationBean validationBeanParam
+  ) {
   }
 }

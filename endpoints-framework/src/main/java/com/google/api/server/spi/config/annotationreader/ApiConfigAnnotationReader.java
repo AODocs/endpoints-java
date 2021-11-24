@@ -387,6 +387,32 @@ public class ApiConfigAnnotationReader implements ApiConfigSource {
     if (annotations.getDefaultValue() != null) {
       defaultValueString = getAnnotationProperty(annotations.getDefaultValue(), "value");
     }
+    ApiValidationConstraints validationConstraints = buildApiValidationConstraints(annotations);
+    ApiParameterConfig parameterConfig =
+        methodConfig.addParameter(parameterNameString, descriptionString, annotations.getNullable() != null, 
+            defaultValueString, type, validationConstraints);
+
+    Annotation apiSerializer =
+        type.getRawType().getAnnotation(annotationTypes.get("ApiTransformer"));
+    if (apiSerializer != null) {
+      Class<? extends Transformer<?, ?>> serializer =
+          getAnnotationProperty(apiSerializer, "value");
+      parameterConfig.setSerializer(serializer);
+    }
+
+    if (parameterConfig.isRepeated()) {
+      TypeToken<?> repeatedItemType = parameterConfig.getRepeatedItemType();
+      apiSerializer =
+          repeatedItemType.getRawType().getAnnotation(annotationTypes.get("ApiTransformer"));
+      if (apiSerializer != null) {
+        Class<? extends Transformer<?, ?>> repeatedItemSerializer =
+            getAnnotationProperty(apiSerializer, "value");
+        parameterConfig.setRepeatedItemSerializer(repeatedItemSerializer);
+      }
+    }
+  }
+  
+  public ApiValidationConstraints buildApiValidationConstraints(ApiConfigAnnotations annotations) throws IllegalAccessException, InvocationTargetException, NoSuchMethodException {
     String patternString = null;
     if (annotations.getPattern() != null) {
       patternString = getAnnotationProperty(annotations.getPattern(), "regexp");
@@ -422,28 +448,7 @@ public class ApiConfigAnnotationReader implements ApiConfigSource {
             patternString, minLong, maxLong, 
             decimalMinString, decimalMaxString, decimalMinInclusive, decimalMaxInclusive, 
             minSize, maxSize);
-    ApiParameterConfig parameterConfig =
-        methodConfig.addParameter(parameterNameString, descriptionString, annotations.getNullable() != null, 
-            defaultValueString, type, validationConstraints);
-
-    Annotation apiSerializer =
-        type.getRawType().getAnnotation(annotationTypes.get("ApiTransformer"));
-    if (apiSerializer != null) {
-      Class<? extends Transformer<?, ?>> serializer =
-          getAnnotationProperty(apiSerializer, "value");
-      parameterConfig.setSerializer(serializer);
-    }
-
-    if (parameterConfig.isRepeated()) {
-      TypeToken<?> repeatedItemType = parameterConfig.getRepeatedItemType();
-      apiSerializer =
-          repeatedItemType.getRawType().getAnnotation(annotationTypes.get("ApiTransformer"));
-      if (apiSerializer != null) {
-        Class<? extends Transformer<?, ?>> repeatedItemSerializer =
-            getAnnotationProperty(apiSerializer, "value");
-        parameterConfig.setRepeatedItemSerializer(repeatedItemSerializer);
-      }
-    }
+    return validationConstraints;
   }
 
   private static <A extends Annotation> A getDeclaredAnnotation(

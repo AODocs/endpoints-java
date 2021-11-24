@@ -15,6 +15,7 @@
  */
 package com.google.api.server.spi.config;
 
+import com.google.api.server.spi.config.model.ApiValidationConstraints;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Preconditions;
 import com.google.common.reflect.TypeToken;
@@ -31,6 +32,7 @@ public class ResourcePropertySchema {
   private final TypeToken<?> type;
   private String description;
   private Boolean required;
+  private ApiValidationConstraints validationConstraints;
 
   private ResourcePropertySchema(TypeToken<?> type) {
     this.type = type;
@@ -67,6 +69,14 @@ public class ResourcePropertySchema {
     return this;
   }
 
+  public ApiValidationConstraints getValidationConstraints() {
+    return validationConstraints;
+  }
+
+  public void setValidationConstraints(ApiValidationConstraints validationConstraints) {
+    this.validationConstraints = validationConstraints;
+  }
+
   /**
    * Returns a default resource property schema for a given type.
    *
@@ -76,28 +86,31 @@ public class ResourcePropertySchema {
   public static ResourcePropertySchema of(TypeToken<?> type) {
     return new ResourcePropertySchema(Preconditions.checkNotNull(type));
   }
-
+  
   @Override
-  public boolean equals(Object obj) {
-    if (this == obj) {
+  public boolean equals(Object o) {
+    if (this == o) {
       return true;
     }
-    if (!(obj instanceof ResourcePropertySchema)) {
+    if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    ResourcePropertySchema that = (ResourcePropertySchema) obj;
-    return Objects.equals(this.type, that.type);
+    ResourcePropertySchema that = (ResourcePropertySchema) o;
+    return type.equals(that.type) && Objects.equals(description, that.description) && Objects.equals(required, that.required) && Objects.equals(validationConstraints, that.validationConstraints);
   }
-
+  
   @Override
   public int hashCode() {
-    return Objects.hash(type);
+    return Objects.hash(type, description, required, validationConstraints);
   }
-
+  
   @Override
   public String toString() {
-    return MoreObjects.toStringHelper(this.getClass())
-        .add("type", type)
-        .toString();
+    return MoreObjects.toStringHelper(this)
+            .add("type", type)
+            .add("description", description)
+            .add("required", required)
+            .add("validationConstraints", validationConstraints)
+            .toString();
   }
 }

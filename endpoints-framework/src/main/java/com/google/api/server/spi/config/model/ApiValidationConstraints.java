@@ -1,6 +1,7 @@
 package com.google.api.server.spi.config.model;
 
 import java.util.Objects;
+import java.util.stream.Stream;
 
 public class ApiValidationConstraints {
 	
@@ -70,6 +71,11 @@ public class ApiValidationConstraints {
 	
 	public Integer getMaxSize() {
 		return maxSize;
+	}
+	
+	public boolean isEmpty() {
+		return Stream.of(pattern, min, max, decimalMin, decimalMax, decimalMinInclusive, decimalMaxInclusive, minSize, maxSize)
+				.allMatch(Objects::isNull);
 	}
 	
 	@Override

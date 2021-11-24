@@ -18,6 +18,8 @@ package com.google.api.server.spi.config.jsonwriter;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
+import com.google.api.server.spi.TypeLoader;
+
 /**
  * Tests for {@link JacksonResourceSchemaProvider}.
  */
@@ -25,6 +27,10 @@ import org.junit.runners.JUnit4;
 public class JacksonResourceSchemaProviderTest extends ResourceSchemaProviderTest {
   @Override
   public ResourceSchemaProvider getResourceSchemaProvider() {
-    return new JacksonResourceSchemaProvider();
+    try {
+      return new JacksonResourceSchemaProvider(new TypeLoader(JacksonResourceSchemaProviderTest.class.getClassLoader()));
+    } catch (ClassNotFoundException e) {
+      throw new RuntimeException(e);
+    }
   }
 }
