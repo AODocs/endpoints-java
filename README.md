@@ -51,6 +51,11 @@ Check
 [closed PRs](https://github.com/AODocs/endpoints-java/pulls?q=is%3Apr+sort%3Aupdated-desc+is%3Aclosed)
 for all additions.
 
+## Troubleshooting
+
+* When using validation with java bean validation annotations : in order to have well named parameters instead of _arg0/arg1_ in error messages, your code must be compiled with the `-parameters` options.
+
+
 ## Contributing
 
 Your contributions are welcome. Please follow the [contributor guidelines](/CONTRIBUTING.md).
