@@ -16,6 +16,8 @@
 package com.google.api.server.spi.dispatcher;
 
 import static com.google.common.truth.Truth.assertThat;
+
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.fail;
 
 import com.google.api.server.spi.dispatcher.PathTrie.Result;
@@ -70,7 +72,80 @@ public class PathTrieTest {
     assertSuccessfulGetResolution(trie, "discovery/v1", 4321);
     assertFailedGetResolution(trie, "");
   }
-
+  
+  @Test
+  public void customMethod() {
+    PathTrie<Integer> trie = PathTrie.<Integer>builder()
+            .add(HttpMethod.GET, "discovery/rest:batchGet", 1234)
+            .build();
+  
+    assertSuccessfulGetResolution(trie, "discovery/rest:batchGet", 1234);
+  }
+  
+  @Test
+  public void emptyCustomMethod() {
+    assertThrows(IllegalArgumentException.class,
+            () -> PathTrie.<Integer>builder()
+                    .add(HttpMethod.GET, "discovery/{version}/rest:", 1234)
+                    .build()
+    );
+  }
+  
+  @Test
+  public void invalidCustomMethod() {
+    assertThrows(IllegalArgumentException.class,
+            () -> PathTrie.<Integer>builder()
+                    .add(HttpMethod.GET, "discovery/{version}/rest:12invalidMethod", 1234)
+                    .build()
+    );
+  }
+  
+  @Test
+  public void customMethodParameter() {
+    PathTrie<Integer> trie = PathTrie.<Integer>builder()
+            .add(HttpMethod.GET, "discovery/{version}/rest:batchGet", 1234)
+            .build();
+  
+    assertSuccessfulGetResolution(
+            trie, "discovery/v1/rest:batchGet", 1234, ImmutableMap.of("version", "v1"));
+  }
+  
+  @Test
+  public void customMethodMultipleParameters() {
+    PathTrie<Integer> trie = PathTrie.<Integer>builder()
+            .add(HttpMethod.GET, "discovery/{discovery_version}/apis/{api}/{format}:batchGet", 1234)
+            .build();
+  
+    assertSuccessfulGetResolution(trie, "discovery/v1/apis/test/rest:batchGet", 1234,
+            ImmutableMap.of("discovery_version", "v1", "api", "test", "format", "rest"));
+  }
+  
+  @Test
+  public void customMethodSharedParameters() {
+    PathTrie<Integer> trie = PathTrie.<Integer>builder()
+            .add(HttpMethod.GET, "discovery/{version}/rest:batchGet", 1234)
+            .add(HttpMethod.GET, "discovery/{version}/rpc", 4321)
+            .build();
+  
+    assertSuccessfulGetResolution(
+            trie, "discovery/v1/rest:batchGet", 1234, ImmutableMap.of("version", "v1"));
+    assertSuccessfulGetResolution(
+            trie, "discovery/v1/rpc", 4321, ImmutableMap.of("version", "v1"));
+  }
+  
+  @Test
+  public void customMethodSamePathDifferentMethod() {
+    PathTrie<Integer> trie = PathTrie.<Integer>builder()
+            .add(HttpMethod.GET, "discovery/{version}/rest:batchGet", 1234)
+            .add(HttpMethod.GET, "discovery/{version}/rest:customList", 4321)
+            .build();
+  
+    assertSuccessfulGetResolution(
+            trie, "discovery/v1/rest:batchGet", 1234, ImmutableMap.of("version", "v1"));
+    assertSuccessfulGetResolution(
+            trie, "discovery/v2/rest:customList", 4321, ImmutableMap.of("version", "v2"));
+  }
+  
   @Test
   public void parameter() {
     PathTrie<Integer> trie = PathTrie.<Integer>builder()
@@ -90,7 +165,7 @@ public class PathTrieTest {
     assertSuccessfulGetResolution(trie, "discovery/v1/apis/test/rest", 1234,
         ImmutableMap.of("discovery_version", "v1", "api", "test", "format", "rest"));
   }
-
+  
   @Test
   public void sharedParameterPrefix() {
     PathTrie<Integer> trie = PathTrie.<Integer>builder()
@@ -229,6 +304,18 @@ public class PathTrieTest {
       // expected
     }
   }
+  
+  @Test
+  public void parameterPathWithUnexpectedPart() {
+    try {
+      PathTrie.<Integer> builder().add(HttpMethod.GET, "bad/{test}unexpected/afterBad", 1234);
+      fail("expected IllegalArgumentException");
+    } catch (IllegalArgumentException e) {
+      // expected
+    }
+  }
+  
+  
 
   @Test
   public void invalidParameterSegment() {
