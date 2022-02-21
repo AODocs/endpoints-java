@@ -17,19 +17,16 @@ package com.google.api.server.spi.dispatcher;
 
 import com.google.common.base.CharMatcher;
 import com.google.common.base.Preconditions;
-import com.google.common.base.Splitter;
-import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableTable;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
-import com.google.common.collect.Table;
 import com.google.common.flogger.FluentLogger;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.EnumMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -45,31 +42,31 @@ import java.util.regex.Pattern;
  * path is resolved, a map from parameter names to raw String values is returned as part of the
  * result. Null values are not acceptable values in this trie. Parameter names can only contain
  * alphanumeric characters or underscores, and cannot start with a numeric.
+ *
  * A path with a <a href="https://cloud.google.com/apis/design/custom_methods">custom method</a>
- * is also supported.
+ * is also supported. It has limited backward compatibility: it is not possible to mix custom
+ * methods with unescaped colon in path parameters.
  */
 public class PathTrie<T> {
   private static final FluentLogger log = FluentLogger.forEnclosingClass();
-  private static final Splitter PATH_SPLITTER = Splitter.on('/');
   private static final String PARAMETER_PATH_SEGMENT = "{}";
   private static final Pattern PARAMETER_NAME_PATTERN = Pattern.compile("[a-zA-Z_][a-zA-Z_\\d]*");
-  private static final Pattern CUSTOM_METHOD_NAME_PATTERN = PARAMETER_NAME_PATTERN;
-  
   // General delimiters that must be URL encoded, as defined by RFC 3986.
   private static final CharMatcher RESERVED_URL_CHARS = CharMatcher.anyOf(":/?#[]{}");
+  public static final String SPLITTER_WITH_DELIMITER = "((?=[%1$s]))";
 
   private final ImmutableMap<String, PathTrie<T>> subTries;
-  private final ImmutableTable<HttpMethod, String, MethodInfo<T>> httpMethodTable;
+  private final ImmutableMap<HttpMethod, MethodInfo<T>> httpMethodMap;
 
   private PathTrie(Builder<T> builder) {
-    this.httpMethodTable = ImmutableTable.copyOf(builder.httpMethodTable);
+    this.httpMethodMap = ImmutableMap.copyOf(builder.httpMethodMap);
     ImmutableMap.Builder<String, PathTrie<T>> subTriesBuilder = ImmutableMap.builder();
     for (Entry<String, Builder<T>> entry : builder.subBuilders.entrySet()) {
       subTriesBuilder.put(entry.getKey(), new PathTrie<>(entry.getValue()));
     }
     this.subTries = subTriesBuilder.build();
   }
-  
+
   /**
    * Attempts to resolve a path. Resolution prefers literal paths over path parameters. The result
    * includes the object to which the path mapped, as well a map from parameter names to
@@ -78,18 +75,21 @@ public class PathTrie<T> {
   public Result<T> resolve(HttpMethod method, String path) {
     Preconditions.checkNotNull(method, "method");
     Preconditions.checkNotNull(path, "path");
-    List<String> pathSegments = getPathSegments(path);
-    String customMethod = extractCustomMethodAndUpdatePathSegments(pathSegments);
-    return resolve(method, customMethod, pathSegments, 0, new ArrayList<>());
+    Result<T> resolve = resolve(method, getPathSegments(path, "/:", false), 0, new ArrayList<>());
+    if (resolve == null) {
+      //required for backward compatibility of clients not encoding : in path segments as expected
+      resolve = resolve(method, getPathSegments(path, "/", false), 0, new ArrayList<>());
+    }
+    return resolve;
   }
 
   private Result<T> resolve(
-      HttpMethod httpMethod, String customMethod, List<String> pathSegments, int index, List<String> rawParameters) {
+      HttpMethod method, List<String> pathSegments, int index, List<String> rawParameters) {
     if (index < pathSegments.size()) {
       String segment = pathSegments.get(index);
       PathTrie<T> subTrie = subTries.get(segment);
       if (subTrie != null) {
-        Result<T> result = subTrie.resolve(httpMethod, customMethod, pathSegments, index + 1, rawParameters);
+        Result<T> result = subTrie.resolve(method, pathSegments, index + 1, rawParameters);
         if (result != null) {
           return result;
         }
@@ -97,16 +97,16 @@ public class PathTrie<T> {
       subTrie = subTries.get(PARAMETER_PATH_SEGMENT);
       if (subTrie != null) {
         // TODO: We likely need to enforce non-empty values here.
-        rawParameters.add(segment);
-        Result<T> result = subTrie.resolve(httpMethod, customMethod, pathSegments, index + 1, rawParameters);
+        rawParameters.add(segment.substring(1));
+        Result<T> result = subTrie.resolve(method, pathSegments, index + 1, rawParameters);
         if (result == null) {
           rawParameters.remove(rawParameters.size() - 1);
         }
         return result;
       }
       return null;
-    } else if (httpMethodTable.contains(httpMethod, customMethod)) {
-      MethodInfo<T> methodInfo = httpMethodTable.get(httpMethod, customMethod);
+    } else if (httpMethodMap.containsKey(method)) {
+      MethodInfo<T> methodInfo = httpMethodMap.get(method);
       ImmutableList<String> parameterNames = methodInfo.parameterNames;
       Preconditions.checkState(rawParameters.size() == parameterNames.size());
       Map<String, String> rawParameterMap = Maps.newHashMap();
@@ -164,7 +164,7 @@ public class PathTrie<T> {
    */
   public static class Builder<T> {
     private final Map<String, Builder<T>> subBuilders = Maps.newHashMap();
-    private final Table<HttpMethod, String, MethodInfo<T>> httpMethodTable = HashBasedTable.create();
+    private final Map<HttpMethod, MethodInfo<T>> httpMethodMap = new EnumMap<>(HttpMethod.class);
     private final boolean throwOnConflict;
 
     public Builder(boolean throwOnConflict) {
@@ -182,16 +182,7 @@ public class PathTrie<T> {
       Preconditions.checkNotNull(path, "path");
       Preconditions.checkNotNull(value, "value");
       // TODO: We likely want to do something about trailing slashes here (make configurable)
-      List<String> pathSegments = getPathSegments(path);
-      String customMethod = extractCustomMethodAndUpdatePathSegments(pathSegments);
-      if (!customMethod.isEmpty()) {
-        Matcher matcher = CUSTOM_METHOD_NAME_PATTERN.matcher(customMethod);
-        if (!matcher.matches()) {
-          throw new IllegalArgumentException(
-                  String.format("'%s' not a valid custom method name", customMethod));
-        }
-      }
-      add(method, customMethod, path, pathSegments.iterator(), value, new ArrayList<>());
+      add(method, path, getPathSegments(path, "/:", true).iterator(), value, new ArrayList<>());
       return this;
     }
 
@@ -199,35 +190,36 @@ public class PathTrie<T> {
       return new PathTrie<>(this);
     }
 
-    private void add(HttpMethod httpMethod, String customMethod, String path, Iterator<String> pathSegments, T value,
+    private void add(HttpMethod method, String path, Iterator<String> pathSegments, T value,
         List<String> parameterNames) {
       if (pathSegments.hasNext()) {
         String segment = pathSegments.next();
-        if (segment.startsWith("{")) {
-          if (segment.endsWith("}")) {
-            parameterNames.add(getAndCheckParameterName(segment));
+        String segmentWithoutDelimiter = segment.substring(1);
+        if (segmentWithoutDelimiter.startsWith("{")) {
+          if (segmentWithoutDelimiter.endsWith("}")) {
+            parameterNames.add(getAndCheckParameterName(segmentWithoutDelimiter));
             getOrCreateSubBuilder(PARAMETER_PATH_SEGMENT)
-                .add(httpMethod, customMethod, path, pathSegments, value, parameterNames);
+                .add(method, path, pathSegments, value, parameterNames);
           } else {
             throw new IllegalArgumentException(
-                String.format("'%s' contains invalid parameter syntax: %s", path, segment));
+                String.format("'%s' contains invalid parameter syntax: %s", path, segmentWithoutDelimiter));
           }
         } else {
-          if (RESERVED_URL_CHARS.matchesAnyOf(segment)) {
+          if (RESERVED_URL_CHARS.matchesAnyOf(segmentWithoutDelimiter)) {
             throw new IllegalArgumentException(
-                String.format("'%s' contains invalid path segment: %s", path, segment));
+                String.format("'%s' contains invalid path segment: %s", path, segmentWithoutDelimiter));
           }
-          getOrCreateSubBuilder(segment).add(httpMethod, customMethod, path, pathSegments, value, parameterNames);
+          getOrCreateSubBuilder(segment).add(method, path, pathSegments, value, parameterNames);
         }
       } else {
-        boolean pathExists = httpMethodTable.contains(httpMethod, customMethod);
+        boolean pathExists = httpMethodMap.containsKey(method);
         if (pathExists && throwOnConflict) {
           throw new IllegalArgumentException(String.format("Path '%s' is already mapped", path));
         }
         if (pathExists) {
           log.atWarning().log("Path '%s' is already mapped, but overwriting it", path);
         }
-        httpMethodTable.put(httpMethod, customMethod, new MethodInfo<>(parameterNames, value));
+        httpMethodMap.put(method, new MethodInfo<>(parameterNames, value));
       }
     }
 
@@ -251,8 +243,17 @@ public class PathTrie<T> {
     }
   }
 
-  private static List<String> getPathSegments(String path) {
-    return Lists.newArrayList(PATH_SPLITTER.splitToList(path));
+  private static List<String> getPathSegments(String path, String pathDelimiters, boolean validateCustomMethod) {
+    if (!path.startsWith("/")) path = "/" + path;
+    List<String> pathSegments = Arrays.asList(path.split(String.format(SPLITTER_WITH_DELIMITER, pathDelimiters)));
+    if (validateCustomMethod && pathSegments.size() > 1) {
+      boolean colonInNonFinalSegment = pathSegments.subList(0, pathSegments.size() - 1)
+          .stream().anyMatch(segment -> segment.startsWith(":"));
+      if (colonInNonFinalSegment) {
+        throw new IllegalArgumentException("Custom method syntax with ':' is only authorized as the last path segment");
+      }
+    }
+    return pathSegments;
   }
 
   private static String decodeUri(String value) {
@@ -262,21 +263,7 @@ public class PathTrie<T> {
       return value;
     }
   }
-  
-  private static String extractCustomMethodAndUpdatePathSegments(List<String> pathSegments) {
-    String customMethod = "";
-    if (!pathSegments.isEmpty()) {
-      String lastSegment = pathSegments.get(pathSegments.size() - 1);
-      String[] segmentParts = lastSegment.split(":");
-      if (segmentParts.length >= 2) {
-        customMethod = segmentParts[segmentParts.length - 1];
-        String lastSegmentWithoutCustomMethod = lastSegment.substring(0, lastSegment.lastIndexOf(":"));
-        pathSegments.set(pathSegments.size() - 1, lastSegmentWithoutCustomMethod);
-      }
-    }
-    return customMethod;
-  }
-  
+
   private static class MethodInfo<T> {
     private final ImmutableList<String> parameterNames;
     private final T value;
