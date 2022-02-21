@@ -81,6 +81,42 @@ public class PathTrieTest {
             .build();
   
     assertSuccessfulGetResolution(trie, "discovery/rest:batchGet", 1234);
+    assertFailedGetResolution(trie, "discovery/rest");
+  }
+  
+  @Test
+  public void lastParameterHasUnescapedColon() {
+    PathTrie<Integer> trie = PathTrie.<Integer>builder()
+            .add(HttpMethod.GET, "discovery/{version}", 1234)
+            .add(HttpMethod.PUT, "discovery/{version}", 4321)
+            .build();
+  
+    assertSuccessfulGetResolution(
+            trie, "discovery/v1:batchGet", 1234, ImmutableMap.of("version", "v1:batchGet"));
+    assertSuccessfulGetResolution(
+            trie, "discovery/v1:first:second", 1234, ImmutableMap.of("version", "v1:first:second"));
+    assertSuccessfulResolution(
+            trie, HttpMethod.PUT, "discovery/v1:batchGet", 4321, ImmutableMap.of("version", "v1:batchGet"));
+  }
+  
+  @Test
+  public void lastParameterHasUnescapedColon_mixed() {
+    PathTrie<Integer> trie = PathTrie.<Integer>builder()
+            .add(HttpMethod.GET, "discovery/{version}", 1234)
+            .add(HttpMethod.GET, "discovery/{version}:batchGet", 4321)
+            .add(HttpMethod.GET, "discovery/rest", 1)
+            .add(HttpMethod.GET, "discovery/rest:batchGet", 2)
+            .build();
+  
+    assertSuccessfulGetResolution(
+            trie, "discovery/v1:batchGet", 4321, ImmutableMap.of("version", "v1"));
+    assertSuccessfulGetResolution(
+            trie, "discovery/v1:notMethod", 1234, ImmutableMap.of("version", "v1:notMethod"));
+    assertSuccessfulGetResolution(trie, "discovery/rest:batchGet", 2);
+    assertSuccessfulGetResolution(trie, "discovery/rest", 1);
+    assertSuccessfulGetResolution(
+            trie, "discovery/rest:notMethod", 1234, ImmutableMap.of("version", "rest:notMethod"));
+    
   }
   
   @Test
@@ -125,9 +161,10 @@ public class PathTrieTest {
     PathTrie<Integer> trie = PathTrie.<Integer>builder()
             .add(HttpMethod.GET, "discovery/{discovery_version}/apis/{api}/{format}:batchGet", 1234)
             .build();
-  
+    
     assertSuccessfulGetResolution(trie, "discovery/v1/apis/test/rest:batchGet", 1234,
             ImmutableMap.of("discovery_version", "v1", "api", "test", "format", "rest"));
+    assertFailedGetResolution(trie, "discovery/v1/apis/test/rest");
   }
   
   @Test
@@ -154,6 +191,7 @@ public class PathTrieTest {
             trie, "discovery/v1/rest:batchGet", 1234, ImmutableMap.of("version", "v1"));
     assertSuccessfulGetResolution(
             trie, "discovery/v1/rest", 4321, ImmutableMap.of("version", "v1"));
+    assertFailedGetResolution(trie, "discovery/v1/rest:unknownMethod");
   }
   
   @Test

@@ -30,10 +30,10 @@ import com.google.common.flogger.FluentLogger;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -105,19 +105,41 @@ public class PathTrie<T> {
         return result;
       }
       return null;
-    } else if (httpMethodTable.contains(httpMethod, customMethod)) {
-      MethodInfo<T> methodInfo = httpMethodTable.get(httpMethod, customMethod);
-      ImmutableList<String> parameterNames = methodInfo.parameterNames;
-      Preconditions.checkState(rawParameters.size() == parameterNames.size());
-      Map<String, String> rawParameterMap = Maps.newHashMap();
-      for (int i = 0; i < parameterNames.size(); i++) {
-        rawParameterMap.put(parameterNames.get(i), decodeUri(rawParameters.get(i)));
-      }
-      return new Result<>(methodInfo.value, rawParameterMap);
+    } else {
+      Optional<String> matchingMethod = findMatchingMethod(index - 1, httpMethod, customMethod);
+      return matchingMethod.map(foundMatchingMethod -> {
+        MethodInfo<T> methodInfo = httpMethodTable.get(httpMethod, foundMatchingMethod);
+        ImmutableList<IndexedParameterName> parameterNames = methodInfo.parameterNames;
+        Preconditions.checkState(rawParameters.size() == parameterNames.size());
+        Map<String, String> rawParameterMap = Maps.newHashMap();
+        for (int i = 0; i < parameterNames.size(); i++) {
+          String parameterValue = decodeUri(rawParameters.get(i));
+          if ((i == parameterNames.size() - 1) && (!customMethod.equals(foundMatchingMethod))) {
+            parameterValue += ":" + decodeUri(customMethod);
+          }
+          rawParameterMap.put(parameterNames.get(i).parameterName, parameterValue);
+        }
+        return new Result<>(methodInfo.value, rawParameterMap);
+      }).orElse(null);
     }
-    return null;
+  }
+  
+  private Optional<String> findMatchingMethod(int pathSegmentsLastIndex, HttpMethod httpMethod, String customMethod) {
+    if (httpMethodTable.contains(httpMethod, customMethod)) {
+      return Optional.of(customMethod);
+    }
+    
+    if (httpMethodTable.contains(httpMethod, "")) {
+      MethodInfo<T> methodInfo = httpMethodTable.get(httpMethod, "");
+      boolean lastSegmentHasParameter = !methodInfo.parameterNames.isEmpty()
+              && methodInfo.parameterNames.get(methodInfo.parameterNames.size() - 1).index == pathSegmentsLastIndex;
+      return lastSegmentHasParameter ? Optional.of("") : Optional.empty();
+    }
+    
+    return Optional.empty();
   }
 
+  
   /**
    * The resulting information for a successful path resolution, which includes the value to which
    * the path maps, as well as the raw (but URL decoded) string values of all path parameters.
@@ -152,7 +174,7 @@ public class PathTrie<T> {
   /**
    * Returns a new {@link PathTrie.Builder}.
    *
-   * @param throwOnConflict whether or not to throw an exception on path conflicts
+   * @param throwOnConflict whether to throw an exception on path conflicts
    * @param <T> the type that the trie will be storing
    */
   public static <T> Builder<T> builder(boolean throwOnConflict) {
@@ -191,7 +213,7 @@ public class PathTrie<T> {
                   String.format("'%s' not a valid custom method name", customMethod));
         }
       }
-      add(method, customMethod, path, pathSegments.iterator(), value, new ArrayList<>());
+      add(method, customMethod, path, pathSegments, 0, value, new ArrayList<>());
       return this;
     }
 
@@ -199,15 +221,15 @@ public class PathTrie<T> {
       return new PathTrie<>(this);
     }
 
-    private void add(HttpMethod httpMethod, String customMethod, String path, Iterator<String> pathSegments, T value,
-        List<String> parameterNames) {
-      if (pathSegments.hasNext()) {
-        String segment = pathSegments.next();
+    private void add(HttpMethod httpMethod, String customMethod, String path, List<String> pathSegments,
+            int segmentIndex, T value, List<IndexedParameterName> parameterNames) {
+      if (segmentIndex < pathSegments.size()) {
+        String segment = pathSegments.get(segmentIndex);
         if (segment.startsWith("{")) {
           if (segment.endsWith("}")) {
-            parameterNames.add(getAndCheckParameterName(segment));
+            parameterNames.add(new IndexedParameterName(segmentIndex, getAndCheckParameterName(segment)));
             getOrCreateSubBuilder(PARAMETER_PATH_SEGMENT)
-                .add(httpMethod, customMethod, path, pathSegments, value, parameterNames);
+                .add(httpMethod, customMethod, path, pathSegments, segmentIndex + 1, value, parameterNames);
           } else {
             throw new IllegalArgumentException(
                 String.format("'%s' contains invalid parameter syntax: %s", path, segment));
@@ -217,7 +239,8 @@ public class PathTrie<T> {
             throw new IllegalArgumentException(
                 String.format("'%s' contains invalid path segment: %s", path, segment));
           }
-          getOrCreateSubBuilder(segment).add(httpMethod, customMethod, path, pathSegments, value, parameterNames);
+          getOrCreateSubBuilder(segment).add(httpMethod, customMethod, path, pathSegments,
+                  segmentIndex + 1, value, parameterNames);
         }
       } else {
         boolean pathExists = httpMethodTable.contains(httpMethod, customMethod);
@@ -278,12 +301,21 @@ public class PathTrie<T> {
   }
   
   private static class MethodInfo<T> {
-    private final ImmutableList<String> parameterNames;
+    private final ImmutableList<IndexedParameterName> parameterNames;
     private final T value;
 
-    MethodInfo(List<String> parameterNames, T value) {
+    MethodInfo(List<IndexedParameterName> parameterNames, T value) {
       this.parameterNames = ImmutableList.copyOf(parameterNames);
       this.value = value;
+    }
+  }
+  
+  private static class IndexedParameterName {
+    private final int index;
+    private final String parameterName;
+    IndexedParameterName(int index, String parameterName) {
+      this.index = index;
+      this.parameterName = parameterName;
     }
   }
 }
