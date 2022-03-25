@@ -16,11 +16,15 @@ package com.google.api.server.spi.tools;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.io.input.ReaderInputStream;
 
 import com.google.api.server.spi.IoUtil;
+import com.google.api.server.spi.Strings;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
@@ -67,15 +71,18 @@ public class LocalClientLibGenerator implements ClientLibGenerator {
     File discoveryFile = File.createTempFile(GENERATOR_EXECUTABLE, "-discovery.tmp");
     try {
       IoUtil.copy(new ReaderInputStream(CharSource.wrap(discoveryDoc).openStream()), discoveryFile);
-
+  
       File generateLibOut = File.createTempFile(GENERATOR_EXECUTABLE, ".out");
       File generateLibErr = File.createTempFile(GENERATOR_EXECUTABLE, ".err");
+  
+      List<String> command = new ArrayList<>(getLibraryGeneratorCommand());
+      command.add(GENERATOR_DISCOVERY_FILE_OPTION + discoveryFile);
+      command.add(GENERATOR_LANGUAGE_OPTION + language);
+      command.add(GENERATOR_DESTINATION_DIRECTORY_OPTION + destinationDirectory.getAbsolutePath());
+      command.add(GENERATOR_API_VERSION_PACKAGE_OPTION);
+  
       ProcessBuilder builder = new ProcessBuilder()
-              .command(GENERATOR_EXECUTABLE,
-                      GENERATOR_DISCOVERY_FILE_OPTION + discoveryFile,
-                      GENERATOR_LANGUAGE_OPTION + language,
-                      GENERATOR_DESTINATION_DIRECTORY_OPTION + destinationDirectory.getAbsolutePath(),
-                      GENERATOR_API_VERSION_PACKAGE_OPTION)
+              .command(command)
               .redirectOutput(generateLibOut)
               .redirectError(generateLibErr);
       int status;
@@ -91,9 +98,36 @@ public class LocalClientLibGenerator implements ClientLibGenerator {
       } else {
         throw new IOException("Failed to generate source code. See " + generateLibErr.getAbsolutePath() + " for details");
       }
-    }
-    finally {
+    } finally {
       discoveryFile.delete();
     }
+  }
+  
+  private List<String> getLibraryGeneratorCommand() {
+    if (System.getProperty("os.name").toLowerCase().contains("win")) {
+      // The generate_library.exe runs library generation asynchronously on Windows due to https://bugs.python.org/issue9148
+      // so we call the script directly
+      
+      String python = System.getenv("GOOGLE_GENERATE_LIBRARY_PYTHON");
+      if (Strings.isEmptyOrWhitespace(python)) {
+        python = "python";
+      }
+      
+      String scriptLocation = System.getenv("GOOGLE_GENERATE_LIBRARY_SCRIPT_LOCATION");
+      if (!Strings.isEmptyOrWhitespace(scriptLocation)) {
+        return Arrays.asList(python, scriptLocation);
+      }
+      File scriptLocationFile = new File(System.getProperty("user.home"), "AppData\\Roaming\\Python\\Python27\\site-packages\\googleapis\\codegen\\generate_library.py");
+      if (scriptLocationFile.isFile()) {
+        return Arrays.asList(python, scriptLocationFile.getAbsolutePath());
+      }
+      
+      throw new IllegalStateException("You should specify the client generation command on Windows. "
+              + "Define the environmental variable GOOGLE_GENERATE_LIBRARY_PYTHON to point at your Python2, "
+              + "and GOOGLE_GENERATE_LIBRARY_SCRIPT_LOCATION to point at your generaty_library.py script "
+              + "(should be something like C:\\Users\\Armin\\AppData\\Roaming\\Python\\Python27\\site-packages\\googleapis\\codegen\\generate_library.py')");
+    }
+    
+    return Collections.singletonList(GENERATOR_EXECUTABLE);
   }
 }
