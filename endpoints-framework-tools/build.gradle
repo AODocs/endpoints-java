@@ -39,4 +39,5 @@ dependencies {
   testImplementation group: 'org.mockito', name: 'mockito-core', version: mockitoVersion
   testImplementation group: 'com.google.truth', name: 'truth', version: truthVersion
   testImplementation group: 'org.springframework', name: 'spring-test', version: springtestVersion
+  testImplementation group: 'javax.inject', name: 'javax.inject', version: javaxinjectVersion
 }

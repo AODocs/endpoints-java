@@ -46,6 +46,8 @@ inactive:
   - [Add description support](https://github.com/AODocs/endpoints-java/pull/40/commits/bbb1eff2bb9e7d28fc2ec17599257d0ef610531d) for resource and resource usage
   - [Configurable naming templates](https://github.com/AODocs/endpoints-java/pull/42) for operationIds and tag names with better defaults
   - Support exclusiveMinimum/exclusiveMaximum, minLength/maxLength and minItems/maxItems attributes
+- Dependency updates
+  - `com.github.ben-manes.versions` plugin added, Dependecy Updates report can be generated via `./gradlew dependencyUpdates` command
 
 Check 
 [closed PRs](https://github.com/AODocs/endpoints-java/pulls?q=is%3Apr+sort%3Aupdated-desc+is%3Aclosed)

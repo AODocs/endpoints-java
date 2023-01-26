@@ -100,7 +100,7 @@ dependencies {
   }
   compileOnly group: 'org.slf4j', name: 'slf4j-nop', version: slf4jVersion
 
-  compileOnly group: 'javax.servlet', name: 'servlet-api', version: servletVersion
+  compileOnly group: 'javax.servlet', name: 'javax.servlet-api', version: servletVersion
   compileOnly group: 'com.google.auto.value', name: 'auto-value-annotations', version: autoValueVersion
   annotationProcessor group: 'com.google.auto.value', name: 'auto-value', version: autoValueVersion
 

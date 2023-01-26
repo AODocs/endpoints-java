@@ -126,9 +126,6 @@
         },
         "reason": {
           "type": "string"
-        },
-        "type": {
-          "type": "string"
         }
       }
     },

@@ -1,5 +1,5 @@
 plugins {
-  id 'com.github.johnrengelman.shadow' version '5.1.0'
+  id 'com.github.johnrengelman.shadow' version '7.1.2'
   id 'java-library'
 }
 
@@ -30,7 +30,7 @@ shadowJar {
 
   dependencies {
     exclude(dependency('com.google.appengine:appengine-api-1.0-sdk:.*'))
-    exclude(dependency('javax.servlet:servlet-api:.*'))
+    exclude(dependency('javax.servlet:javax.servlet-api:.*'))
   }
 }
 
@@ -41,7 +41,7 @@ artifacts {
 dependencies {
   compileOnly project(':endpoints-framework')
   api group: 'com.google.appengine', name: 'appengine-api-1.0-sdk', version: appengineVersion
-  api group: 'javax.servlet', name: 'servlet-api', version: servletVersion
+  api group: 'javax.servlet', name: 'javax.servlet-api', version: servletVersion
 }
 
 configureMaven(project, 'Endpoints Framework', 'A framework for building RESTful web APIs.')
