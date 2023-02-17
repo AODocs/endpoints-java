@@ -175,6 +175,7 @@ public class ApiConfigTest {
     apiConfig.setClientIds(ImmutableList.of("clientid"));
     apiConfig.setAuthenticators(
         ImmutableList.<Class<? extends Authenticator>>of(GoogleJwtAuthenticator.class));
+    apiConfig.setRestrictedTo(ImmutableList.of("restrictedTo"));
     assertThat(apiConfig).isEqualTo(new ApiConfig(apiConfig));
   }
 }

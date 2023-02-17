@@ -195,4 +195,10 @@ class ApiAnnotationConfig {
     }
     config.setApiLimitMetrics(metricConfigs.build());
   }
+  
+  public void setRestrictedToIfSpecified(String[] restrictedTo) {
+    if (!AnnotationUtil.isUnspecified(restrictedTo)) {
+      config.setRestrictedTo(Arrays.asList(restrictedTo));
+    }
+  }
 }

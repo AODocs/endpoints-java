@@ -83,6 +83,7 @@ public class ApiConfig {
 
   private final ApiClassConfig apiClassConfig;
   private List<ApiLimitMetricConfig> apiLimitMetrics;
+  private List<String> restrictedTo;
 
   /**
    * Simple factory to create {@link ApiConfig} instances.
@@ -147,6 +148,7 @@ public class ApiConfig {
     this.serializationConfig = new ApiSerializationConfig(original.serializationConfig);
     this.namespaceConfig = new ApiNamespaceConfig(original.namespaceConfig);
     this.apiClassConfig = new ApiClassConfig(original.apiClassConfig, this);
+    this.restrictedTo = original.restrictedTo == null ? null : new ArrayList<>(original.restrictedTo);
   }
 
   @Override
@@ -189,6 +191,7 @@ public class ApiConfig {
         .addIfInconsistent("issuers", issuers, config.issuers)
         .addIfInconsistent("issuerAudiencies", issuerAudiences, config.issuerAudiences)
         .addIfInconsistent("clientIds", clientIds, config.clientIds)
+        .addIfInconsistent("restrictedTo", restrictedTo, config.restrictedTo)
         .addIfInconsistent("authenticators", authenticators, config.authenticators)
         .addIfInconsistent("apiKeyRequired", apiKeyRequired, config.apiKeyRequired)
         .addIfInconsistent("apiLimitMetrics", apiLimitMetrics, config.apiLimitMetrics)
@@ -207,7 +210,7 @@ public class ApiConfig {
         resource, authLevel, scopeExpression, audiences, clientIds, authenticators,
         authConfig, cacheControlConfig, frontendLimitsConfig,
         serializationConfig, apiClassConfig, issuers, issuerAudiences, apiKeyRequired,
-        apiLimitMetrics);
+        apiLimitMetrics, restrictedTo);
   }
 
   /**
@@ -277,6 +280,7 @@ public class ApiConfig {
     authenticators = null;
     apiKeyRequired = false;
     apiLimitMetrics = ImmutableList.of();
+    restrictedTo = null;
   }
 
   public ApiKey getApiKey() {
@@ -498,5 +502,13 @@ public class ApiConfig {
 
   public List<ApiLimitMetricConfig> getApiLimitMetrics() {
     return apiLimitMetrics;
+  }
+  
+  public void setRestrictedTo(List<String> restrictedTo) {
+    this.restrictedTo = restrictedTo;
+  }
+  
+  public List<String> getRestrictedTo() {
+    return restrictedTo;
   }
 }

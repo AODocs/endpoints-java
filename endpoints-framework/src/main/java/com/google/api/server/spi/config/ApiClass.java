@@ -88,4 +88,10 @@ public @interface ApiClass {
    * no effect unless used with endpoints-management-control-appengine.
    */
   AnnotationBoolean apiKeyRequired() default AnnotationBoolean.UNSPECIFIED;
+  
+  /**
+   * RestrictedTo associated to a list of "label", applicable to all methods of the API unless overridden
+   * by {@code @ApiMethod#restrictedTo}.
+   */
+  String[] restrictedTo() default {Api.UNSPECIFIED_STRING_FOR_LIST};
 }

@@ -17,6 +17,7 @@ package com.google.api.server.spi.config.annotationreader;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import com.google.api.server.spi.Constant;
 import com.google.api.server.spi.EndpointMethod;
@@ -369,6 +370,50 @@ public class ApiAnnotationConfigTest {
   public void testSetAuthenticatorIfSpecified() throws Exception {
     annotationConfig.setAuthenticatorsIfSpecified(PassAuthenticator.testArray);
     assertEquals(Arrays.asList(PassAuthenticator.testArray), config.getAuthenticators());
+  }
+  
+  @Test
+  public void testSetRestrictedToIfSpecified() throws Exception {
+    String[] restrictedTo = { "foo", "bar" };
+    annotationConfig.setRestrictedToIfSpecified(restrictedTo);
+    assertEquals(Arrays.asList(restrictedTo), config.getRestrictedTo());
+    
+    ApiMethodConfig methodConfig =
+            config.getApiClassConfig().getMethods().getOrCreate(getResultNoParamsMethod());
+    assertEquals(Arrays.asList(restrictedTo), methodConfig.getRestrictedTo());
+  }
+  
+  @Test
+  public void testSetRestrictedToIfSpecified_empty() throws Exception {
+    String[] empty = {};
+    annotationConfig.setRestrictedToIfSpecified(empty);
+    EndpointMethod method = getResultNoParamsMethod();
+    ApiMethodConfig methodConfig = config.getApiClassConfig().getMethods().getOrCreate(method);
+    assertEquals(Collections.emptyList(), methodConfig.getRestrictedTo());
+    
+    String[] restrictedTo = { "bleh", "more bleh" };
+    annotationConfig.setRestrictedToIfSpecified(restrictedTo);
+    annotationConfig.setRestrictedToIfSpecified(empty);
+    assertEquals(Collections.emptyList(), config.getRestrictedTo());
+  }
+  
+  @Test
+  public void testSetRestrictedToIfSpecified_unspecified() throws Exception {
+    String[] unspecified = {Api.UNSPECIFIED_STRING_FOR_LIST};
+    
+    EndpointMethod method = getResultNoParamsMethod();
+    annotationConfig.setScopesIfSpecified(unspecified);
+    ApiMethodConfig methodConfig = config.getApiClassConfig().getMethods().getOrCreate(method);
+    assertNull(methodConfig.getRestrictedTo());
+    
+    String[] restrictedTo = {"bleh", "more bleh"};
+    annotationConfig.setRestrictedToIfSpecified(restrictedTo);
+    annotationConfig.setRestrictedToIfSpecified(null);
+    assertEquals(Arrays.asList(restrictedTo), config.getRestrictedTo());
+    
+    annotationConfig.setRestrictedToIfSpecified(restrictedTo);
+    annotationConfig.setRestrictedToIfSpecified(unspecified);
+    assertEquals(Arrays.asList(restrictedTo), config.getRestrictedTo());
   }
 
   //Unchecked cast needed to get a generic array type.

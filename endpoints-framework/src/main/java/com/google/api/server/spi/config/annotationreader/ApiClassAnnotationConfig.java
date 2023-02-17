@@ -93,4 +93,9 @@ public class ApiClassAnnotationConfig {
       config.setApiKeyRequired(false);
     }
   }
+  public void setRestrictedToIfSpecified(String[] restrictedTo) {
+    if (!AnnotationUtil.isUnspecified(restrictedTo)) {
+      config.setRestrictedTo(Arrays.asList(restrictedTo));
+    }
+  }
 }

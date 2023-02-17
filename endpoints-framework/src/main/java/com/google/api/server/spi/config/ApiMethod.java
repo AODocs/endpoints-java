@@ -125,4 +125,9 @@ public @interface ApiMethod {
    * A list of metric costs associated with this method.
    */
   ApiMetricCost[] metricCosts() default {};
+  
+  /**
+   * RestrictedTo associated to a list of "label"
+   * */
+  String[] restrictedTo() default {Api.UNSPECIFIED_STRING_FOR_LIST};
 }

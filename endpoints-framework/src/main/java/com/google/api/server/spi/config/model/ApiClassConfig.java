@@ -53,6 +53,7 @@ public class ApiClassConfig {
   private Boolean apiKeyRequired;
 
   private final MethodConfigMap methods;
+  private List<String> restrictedTo;
 
   public ApiClassConfig(ApiConfig apiConfig, TypeLoader typeLoader, Class<?> apiClass) {
     this.apiConfig = apiConfig;
@@ -69,6 +70,7 @@ public class ApiClassConfig {
     this.useDatastore = null;
     this.methods = new MethodConfigMap(this);
     this.apiKeyRequired = null;
+    this.restrictedTo = null;
   }
 
   public ApiClassConfig(ApiClassConfig original, ApiConfig apiConfig) {
@@ -87,6 +89,7 @@ public class ApiClassConfig {
     this.useDatastore = original.useDatastore;
     this.methods = new MethodConfigMap(original.methods, this);
     this.apiKeyRequired = original.apiKeyRequired;
+    this.restrictedTo = original.restrictedTo == null ? null : new ArrayList<>(original.restrictedTo);
   }
 
   @Override
@@ -105,9 +108,10 @@ public class ApiClassConfig {
           Objects.equals(issuerAudiences, config.issuerAudiences) &&
           Objects.equals(clientIds, config.clientIds) &&
           Objects.equals(authenticators, config.authenticators) &&
-          Objects.equals(useDatastore, config.useDatastore) &&
-          methods.equals(config.methods) &&
-          Objects.equals(apiKeyRequired, config.apiKeyRequired);
+              Objects.equals(useDatastore, config.useDatastore) &&
+              methods.equals(config.methods) &&
+              Objects.equals(apiKeyRequired, config.apiKeyRequired) &&
+          Objects.equals(restrictedTo, config.restrictedTo);
     } else {
       return false;
     }
@@ -117,7 +121,7 @@ public class ApiClassConfig {
   public int hashCode() {
     return Objects.hash(apiClassJavaName, apiClassJavaSimpleName, typeLoader, resource,
         authLevel, scopeExpression, audiences, clientIds, authenticators,
-        useDatastore, methods, issuerAudiences, apiKeyRequired);
+        useDatastore, methods, issuerAudiences, apiKeyRequired, restrictedTo);
   }
 
   public ApiConfig getApiConfig() {
@@ -211,7 +215,15 @@ public class ApiClassConfig {
   public boolean isApiKeyRequired() {
     return apiKeyRequired != null ? apiKeyRequired : apiConfig.isApiKeyRequired();
   }
-
+  
+  public void setRestrictedTo(List<String> restrictedTo) {
+    this.restrictedTo = restrictedTo;
+  }
+  
+  public List<String> getRestrictedTo() {
+    return restrictedTo != null ? restrictedTo : apiConfig.getRestrictedTo();
+  }
+  
   /**
    * {@link Map} of API methods for this API class.
    */

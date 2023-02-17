@@ -187,7 +187,7 @@ public class ApiMethodConfig {
   private int responseStatus;
   private Class<?>[] exceptionTypes;
   private List<ApiMetricCostConfig> metricCosts;
-
+  private List<String> restrictedTo;
   private final TypeLoader typeLoader;
 
   public ApiMethodConfig(EndpointMethod method, TypeLoader typeLoader,
@@ -219,6 +219,7 @@ public class ApiMethodConfig {
     this.responseStatus = original.responseStatus;
     this.typeLoader = original.typeLoader;
     this.metricCosts = original.metricCosts;
+    this.restrictedTo = original.restrictedTo == null ? null : new ArrayList<>(original.restrictedTo);
 
     // Parameter configs are mutable, so we need to do a deep copy.
     this.parameterConfigs = new ArrayList<>(original.parameterConfigs.size());
@@ -259,6 +260,7 @@ public class ApiMethodConfig {
     responseStatus = RESPONSE_STATUS_UNSPECIFIED;
     exceptionTypes = endpointMethod.getMethod().getExceptionTypes();
     metricCosts = ImmutableList.of();
+    restrictedTo = null;
   }
 
   private RestMethod getRestMethod(Method method) {
@@ -290,7 +292,8 @@ public class ApiMethodConfig {
           apiKeyRequired == config.apiKeyRequired &&
           Objects.equals(returnType, config.returnType) &&
           responseStatus == config.responseStatus &&
-          Objects.equals(metricCosts, config.metricCosts);
+          Objects.equals(metricCosts, config.metricCosts) &&
+              Objects.equals(restrictedTo, config.restrictedTo);
     } else {
       return false;
     }
@@ -300,7 +303,7 @@ public class ApiMethodConfig {
   public int hashCode() {
     return Objects.hash(endpointMethodName, parameterConfigs, name, path, httpMethod,
         scopeExpression, audiences, clientIds, authenticators, typeLoader,
-        ignored, issuerAudiences, apiKeyRequired, returnType, responseStatus, metricCosts);
+        ignored, issuerAudiences, apiKeyRequired, returnType, responseStatus, metricCosts, restrictedTo);
   }
 
   public ApiClassConfig getApiClassConfig() {
@@ -590,5 +593,13 @@ public class ApiMethodConfig {
 
   public List<ApiMetricCostConfig> getMetricCosts() {
     return metricCosts;
+  }
+  
+  public void setRestrictedTo(List<String> restrictedTo) {
+    this.restrictedTo = restrictedTo;
+  }
+  
+  public List<String> getRestrictedTo() {
+    return restrictedTo != null ? restrictedTo : apiClassConfig.getRestrictedTo();
   }
 }

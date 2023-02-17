@@ -196,6 +196,36 @@ public class ApiClassAnnotationConfigTest {
 
     Mockito.verifyNoMoreInteractions(config);
   }
+  
+  @Test
+  public void testSetRestrictedToIfSpecified() throws Exception {
+    String[] restrictedTo = {"foo", "bar"};
+    annotationConfig.setRestrictedToIfSpecified(restrictedTo);
+    Mockito.verify(config).setRestrictedTo(Arrays.asList(restrictedTo));
+  }
+  
+  @Test
+  public void testSetRestrictedToIfSpecified_empty() throws Exception {
+    String[] empty = {};
+    annotationConfig.setRestrictedToIfSpecified(empty);
+    Mockito.verify(config).setRestrictedTo(Arrays.asList(empty));
+  }
+  
+  @Test
+  public void testSetRestrictedToIfSpecified_unspecified() throws Exception {
+    annotationConfig.setRestrictedToIfSpecified(null);
+    Mockito.verifyNoInteractions(config);
+    
+    String[] unspecified = {Api.UNSPECIFIED_STRING_FOR_LIST};
+    annotationConfig.setRestrictedToIfSpecified(unspecified);
+    Mockito.verifyNoInteractions(config);
+    
+    String[] restrictedTo = {"bleh", "more bleh"};
+    annotationConfig.setRestrictedToIfSpecified(restrictedTo);
+    annotationConfig.setRestrictedToIfSpecified(unspecified);
+    Mockito.verify(config).setRestrictedTo(Arrays.asList(restrictedTo));
+    Mockito.verifyNoMoreInteractions(config);
+  }
 
   private static AuthScopeExpression toScopeExpression(String... scopes) {
     return AuthScopeExpressions.interpret(scopes);

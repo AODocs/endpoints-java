@@ -136,4 +136,10 @@ class ApiMethodAnnotationConfig {
     }
     config.setMetricCosts(costs.build());
   }
+  
+  public void setRestrictedToIfSpecified(String[] restrictedTo) {
+    if (!AnnotationUtil.isUnspecified(restrictedTo)) {
+      config.setRestrictedTo(Arrays.asList(restrictedTo));
+    }
+  }
 }

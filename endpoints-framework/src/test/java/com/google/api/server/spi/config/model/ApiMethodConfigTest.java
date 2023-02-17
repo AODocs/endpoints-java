@@ -52,11 +52,13 @@ public class ApiMethodConfigTest {
       AuthScopeExpressions.interpret("s1", "s2");
   private static final List<String> defaultAudiences = Lists.newArrayList("a1", "a2");
   private static final List<String> defaultClientIds = Lists.newArrayList("c1", "c2");
+  private static final List<String> defaultRestrictedTo = Lists.newArrayList("r1", "r2");
 
   private static final AuthScopeExpression defaultScopeExpression2 =
       AuthScopeExpressions.interpret("s1", "s2", "s3");
   private static final List<String> defaultAudiences2 = Lists.newArrayList("a1");
   private static final List<String> defaultClientIds2 = Lists.newArrayList("c1", "c2", "c3");
+  private static final List<String> defaultRestrictedTo2 = Lists.newArrayList("r1", "r2", "r3");
 
   private static final TypeToken voidReturnType = TypeToken.of(Void.class);
   private static final TypeToken stringReturnType = TypeToken.of(String.class);
@@ -71,6 +73,7 @@ public class ApiMethodConfigTest {
     Mockito.when(apiClassConfig.getAudiences()).thenReturn(defaultAudiences);
     Mockito.when(apiClassConfig.getClientIds()).thenReturn(defaultClientIds);
     Mockito.when(apiClassConfig.getApiClassJavaSimpleName()).thenReturn("className");
+    Mockito.when(apiClassConfig.getRestrictedTo()).thenReturn(defaultRestrictedTo);
     Mockito.when(apiClassConfig.getApiConfig()).thenReturn(apiConfig);
 
     Mockito.when(method.getMethod()).thenReturn(TestEndpoint.class.getMethod("getResultNoParams"));
@@ -84,6 +87,7 @@ public class ApiMethodConfigTest {
     assertEquals(defaultScopeExpression, methodConfig.getScopeExpression());
     assertEquals(defaultAudiences, methodConfig.getAudiences());
     assertEquals(defaultClientIds, methodConfig.getClientIds());
+    assertEquals(defaultRestrictedTo, methodConfig.getRestrictedTo());
   }
 
   @Test
@@ -92,11 +96,13 @@ public class ApiMethodConfigTest {
     Mockito.when(apiClassConfig.getScopeExpression()).thenReturn(defaultScopeExpression2);
     Mockito.when(apiClassConfig.getAudiences()).thenReturn(defaultAudiences2);
     Mockito.when(apiClassConfig.getClientIds()).thenReturn(defaultClientIds2);
+    Mockito.when(apiClassConfig.getRestrictedTo()).thenReturn(defaultRestrictedTo2);
 
     assertEquals(AuthLevel.REQUIRED, methodConfig.getAuthLevel());
     assertEquals(defaultScopeExpression2, methodConfig.getScopeExpression());
     assertEquals(defaultAudiences2, methodConfig.getAudiences());
     assertEquals(defaultClientIds2, methodConfig.getClientIds());
+    assertEquals(defaultRestrictedTo2, methodConfig.getRestrictedTo());
   }
 
   @Test

@@ -63,6 +63,7 @@ public class ApiMethodAnnotationConfigTest {
   private static final AuthScopeExpression defaultScopeExpression = toScopeExpression("s1", "s2");
   private static final List<String> defaultAudiences = Lists.newArrayList("a1", "a2");
   private static final List<String> defaultClientIds = Lists.newArrayList("c1", "c2");
+  private static final List<String> defaultRestrictedTo = Lists.newArrayList("r1", "r2");
   private static final List<Class<? extends Authenticator>> defaultAuthenticators =
       ImmutableList.<Class<? extends Authenticator>>of(EndpointsAuthenticator.class);
 
@@ -75,6 +76,7 @@ public class ApiMethodAnnotationConfigTest {
     Mockito.when(apiClassConfig.getScopeExpression()).thenReturn(defaultScopeExpression);
     Mockito.when(apiClassConfig.getAudiences()).thenReturn(defaultAudiences);
     Mockito.when(apiClassConfig.getClientIds()).thenReturn(defaultClientIds);
+    Mockito.when(apiClassConfig.getRestrictedTo()).thenReturn(defaultRestrictedTo);
     Mockito.<List<Class<? extends Authenticator>>>when(apiClassConfig.getAuthenticators())
         .thenReturn(defaultAuthenticators);
     Mockito.when(apiClassConfig.getApiClassJavaSimpleName()).thenReturn(
@@ -98,6 +100,7 @@ public class ApiMethodAnnotationConfigTest {
     assertEquals(defaultAudiences, config.getAudiences());
     assertEquals(defaultClientIds, config.getClientIds());
     assertEquals(defaultAuthenticators, config.getAuthenticators());
+    assertEquals(defaultRestrictedTo, config.getRestrictedTo());
   }
 
   @Test
@@ -364,7 +367,42 @@ public class ApiMethodAnnotationConfigTest {
     annotationConfig.setAuthenticatorsIfSpecified(unspecifiedConverted);
     assertEquals(Arrays.asList(PassAuthenticator.testArray), config.getAuthenticators());
   }
-
+  @Test
+  public void testSetRestrictedToIfSpecified() throws Exception {
+    String[] restrictedTo = {"foo", "bar"};
+    annotationConfig.setRestrictedToIfSpecified(restrictedTo);
+    
+    assertEquals(Arrays.asList(restrictedTo), config.getRestrictedTo());
+  }
+  
+  @Test
+  public void testSetRestrictedToIfSpecified_empty() throws Exception {
+    String[] empty = {};
+    annotationConfig.setRestrictedToIfSpecified(empty);
+    assertEquals(Collections.emptyList(), config.getRestrictedTo());
+    
+    String[] restrictedTo = {"bleh", "more bleh"};
+    annotationConfig.setRestrictedToIfSpecified(restrictedTo);
+    annotationConfig.setRestrictedToIfSpecified(empty);
+    assertEquals(Collections.emptyList(), config.getRestrictedTo());
+  }
+  
+  @Test
+  public void testSetRestrictedToIfSpecified_unspecified() throws Exception {
+    testDefaults();
+    
+    annotationConfig.setRestrictedToIfSpecified(null);
+    testDefaults();
+    
+    String[] unspecified = {Api.UNSPECIFIED_STRING_FOR_LIST};
+    annotationConfig.setRestrictedToIfSpecified(unspecified);
+    testDefaults();
+    
+    String[] restrictedTo = {"bleh", "more bleh"};
+    annotationConfig.setRestrictedToIfSpecified(restrictedTo);
+    annotationConfig.setRestrictedToIfSpecified(unspecified);
+    assertEquals(Arrays.asList(restrictedTo), config.getRestrictedTo());
+  }
   private static AuthScopeExpression toScopeExpression(String... scopes) {
     return AuthScopeExpressions.interpret(scopes);
   }

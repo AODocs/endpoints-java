@@ -182,4 +182,10 @@ public @interface Api {
    * Rate limiting metric definitions that are used in this API.
    */
   ApiLimitMetric[] limitDefinitions() default {};
+  
+  /**
+   * RestrictedTo associated to a list of "label", applicable to all methods of the API unless overridden
+   * by {@code @ApiClass#restrictedTo} or {@code @ApiMethod#restrictedTo}.
+   */
+  String[] restrictedTo() default {UNSPECIFIED_STRING_FOR_LIST};
 }
