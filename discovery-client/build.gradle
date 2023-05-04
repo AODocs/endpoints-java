@@ -22,10 +22,10 @@ archivesBaseName = 'google-api-services-discovery'
 //the sources are included in the main artifact, the version does not matter
 version = 'doesnotmatter'
 
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
+sourceCompatibility = 17
+targetCompatibility = 17
 jar.manifest.attributes("Built-By": "Google")
-jar.manifest.attributes("Build-Jdk": "1.8.x")
+jar.manifest.attributes("Build-Jdk": "1.17.x")
 
 java {
   withSourcesJar()
