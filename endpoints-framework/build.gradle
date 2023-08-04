@@ -119,7 +119,7 @@ dependencies {
   testImplementation group: 'com.google.guava', name: 'guava-testlib', version: guavaVersion
   testImplementation (group: 'io.swagger', name: 'swagger-validator', version: '1.0.7') {
     exclude group: 'javax.servlet', module: 'javax.servlet-api'
+    exclude group: 'javax.validation', module: 'validation-api'
     exclude group: 'ch.qos.logback', module: 'logback-classic'
   }
 }
-
