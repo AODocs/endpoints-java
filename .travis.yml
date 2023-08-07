@@ -1,7 +1,7 @@
 dist: bionic
 language: java
 jdk:
-  - openjdk17
+  - openjdk8
 before_install:
   - sudo apt-get -y install python2.7 python-pip
   - python2 -m pip install --user google-apis-client-generator
