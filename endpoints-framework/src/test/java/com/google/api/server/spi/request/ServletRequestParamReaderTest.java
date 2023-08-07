@@ -60,10 +60,10 @@ import java.util.TimeZone;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
-import javax.validation.Valid;
-import javax.validation.constraints.Min;
-import javax.validation.constraints.Pattern;
-import javax.validation.constraints.Size;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -803,16 +803,16 @@ public class ServletRequestParamReaderTest {
     assertEquals(1, params.length);
     assertEquals(true, params[0]);
   }
-  
+
   @Test
   public void testNameInParamsAndResource() throws Exception {
     class TestNameInParamsAndResource {
       @SuppressWarnings("unused")
-      public void test(@Named("stringValue") List<String> string, 
+      public void test(@Named("stringValue") List<String> string,
           @Nullable @Named("integerValue") List<Integer> integer, Request resource) {}
     }
     Object[] params = readParameters(
-        "{\"stringValue\": [\"fromParams\"], \"integerValue\": [1,2,3], " 
+        "{\"stringValue\": [\"fromParams\"], \"integerValue\": [1,2,3], "
             + "\"resource\": {\"stringValue\": \"abc\", \"integerValue\": 42}}",
         TestNameInParamsAndResource.class
             .getDeclaredMethod("test", List.class, List.class, Request.class), new TestNameInParamsAndResource());
@@ -919,19 +919,19 @@ public class ServletRequestParamReaderTest {
       assertTrue("failed for unexpected reason: " + ex.getMessage(), ex.getMessage().contains("testParam must match"));
     }
   }
-  
+
   @Test
   public void testPatternAnnotation_match() throws Exception {
     class TestPatternAnnotation {
       @SuppressWarnings("unused")
       public void test(@Named("testParam") @Pattern(regexp = "^\\d{2}$") String testParam) {}
     }
-    Object[] params = readParameters("{\"testParam\":\"42\"}", 
+    Object[] params = readParameters("{\"testParam\":\"42\"}",
             TestPatternAnnotation.class.getDeclaredMethod("test", String.class), new TestPatternAnnotation());
     assertEquals(1, params.length);
     assertEquals("42", params[0]);
   }
-  
+
   @Test
   public void testPatternAnnotation_customError() throws Exception {
     class TestPatternAnnotation {
@@ -946,27 +946,27 @@ public class ServletRequestParamReaderTest {
       assertTrue("failed for unexpected reason: " + ex.getMessage(), ex.getMessage().contains("testParam custom error message"));
     }
   }
-  
+
   static class TestPatternAnnotationInResourceRequest {
-    
+
     @Min(value = 3)
     private Integer integerValue;
-    
+
     public TestPatternAnnotationInResourceRequest() {
     }
-    
+
     public TestPatternAnnotationInResourceRequest(Integer stringValue) {
       this.integerValue = stringValue;
     }
-    
+
     public void setIntegerValue(Integer integerValue) {
       this.integerValue = integerValue;
     }
-    
+
     public Integer getIntegerValue() {
       return integerValue;
     }
-    
+
     @Override
     public boolean equals(Object o) {
       if (this == o) {
@@ -978,30 +978,30 @@ public class ServletRequestParamReaderTest {
       TestPatternAnnotationInResourceRequest request = (TestPatternAnnotationInResourceRequest) o;
       return Objects.equals(integerValue, request.integerValue);
     }
-    
+
     @Override
     public int hashCode() {
       return Objects.hash(integerValue);
     }
   }
-  
+
   @Test
   public void testValidAnnotationInResource() throws Exception {
-    
+
     class TestPatternAnnotationInResource {
       @SuppressWarnings("unused")
       public void test(@Valid TestPatternAnnotationInResourceRequest resource) {}
     }
-    try { 
+    try {
       readParameters("{\"resource\":{\"integerValue\":2}}",
             TestPatternAnnotationInResource.class.getDeclaredMethod("test", TestPatternAnnotationInResourceRequest.class), new TestPatternAnnotationInResource());
-      
+
       fail("expected bad request exception");
     } catch (BadRequestException ex) {
       assertTrue("failed for unexpected reason: " + ex.getMessage(), ex.getMessage().contains("resource.integerValue must be greater than"));
     }
   }
-  
+
   @Test
   public void testSizeAnnotation_invalid() throws Exception {
     class TestPatternAnnotation {

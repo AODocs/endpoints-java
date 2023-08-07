@@ -192,17 +192,17 @@ public final class TypeLoader {
     annotationTypes.put("Nullable",
         loadAnnotation(classLoader, "com.google.api.server.spi.config.Nullable"));
     annotationTypes.put("Pattern",
-            loadAnnotation(classLoader, "javax.validation.constraints.Pattern"));
+            loadAnnotation(classLoader, "jakarta.validation.constraints.Pattern"));
     annotationTypes.put("Min",
-            loadAnnotation(classLoader, "javax.validation.constraints.Min"));
+            loadAnnotation(classLoader, "jakarta.validation.constraints.Min"));
     annotationTypes.put("Max",
-            loadAnnotation(classLoader, "javax.validation.constraints.Max"));
+            loadAnnotation(classLoader, "jakarta.validation.constraints.Max"));
     annotationTypes.put("DecimalMin",
-            loadAnnotation(classLoader, "javax.validation.constraints.DecimalMin"));
+            loadAnnotation(classLoader, "jakarta.validation.constraints.DecimalMin"));
     annotationTypes.put("DecimalMax",
-            loadAnnotation(classLoader, "javax.validation.constraints.DecimalMax"));
+            loadAnnotation(classLoader, "jakarta.validation.constraints.DecimalMax"));
     annotationTypes.put("Size",
-            loadAnnotation(classLoader, "javax.validation.constraints.Size"));
+            loadAnnotation(classLoader, "jakarta.validation.constraints.Size"));
     return Collections.unmodifiableMap(annotationTypes);
   }
 
