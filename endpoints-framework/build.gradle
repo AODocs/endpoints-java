@@ -106,6 +106,7 @@ dependencies {
 
   api group: 'org.hibernate.validator', name: 'hibernate-validator', version: hibernateValidatorVersion
   api group: 'jakarta.validation', name: 'jakarta.validation-api', version: validationApiVersion
+  api group: 'com.nimbusds', name: 'nimbus-jose-jwt', version: nimbusVersion
 
   testImplementation project(':test-utils')
   testImplementation project(':discovery-client')

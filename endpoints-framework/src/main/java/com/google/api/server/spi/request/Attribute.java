@@ -70,7 +70,9 @@ public class Attribute {
    * have failed anyway because of unauthorized client id or audience.
    */
   public static final String ID_TOKEN = "endpoints:Id-Token";
-
+  
+  public static final String MICROSOFT_ID_TOKEN = "endpoints:MS-Token";
+  
   private final HttpServletRequest request;
 
   @VisibleForTesting
