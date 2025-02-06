@@ -15,8 +15,6 @@
  */
 package com.google.api.server.spi.auth;
 
-import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
-import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 import com.google.api.server.spi.Client;
 import com.google.api.server.spi.auth.common.User;
 import com.google.api.server.spi.config.Authenticator;
@@ -35,19 +33,19 @@ import javax.servlet.http.HttpServletRequest;
 @Singleton
 public class GoogleJwtAuthenticator implements Authenticator {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
-  private final GoogleIdTokenVerifier verifier;
+  private final GoogleCustomIdTokenVerifier verifier;
 
   public GoogleJwtAuthenticator() {
-    this(new GoogleIdTokenVerifier.Builder(Client.getInstance().getHttpTransport(),
+    this(new GoogleCustomIdTokenVerifier.Builder(Client.getInstance().getHttpTransport(),
         Client.getInstance().getJsonFactory()).build());
   }
 
-  public GoogleJwtAuthenticator(GoogleIdTokenVerifier verifier) {
+  public GoogleJwtAuthenticator(GoogleCustomIdTokenVerifier verifier) {
     this.verifier = verifier;
   }
 
   @VisibleForTesting
-  GoogleIdToken verifyToken(String token) {
+  GoogleCustomIdToken verifyToken(String token) {
     if (token == null) {
       return null;
     }
@@ -71,7 +69,7 @@ public class GoogleJwtAuthenticator implements Authenticator {
       return null;
     }
 
-    GoogleIdToken idToken = verifyToken(token);
+    GoogleCustomIdToken idToken = verifyToken(token);
     if (idToken == null) {
       return null;
     }
@@ -96,7 +94,7 @@ public class GoogleJwtAuthenticator implements Authenticator {
     }
 
     String userId = idToken.getPayload().getSubject();
-    String email = idToken.getPayload().getEmail();
+    String email = idToken.getPayload().getPrimaryEmail();
     User user = (userId == null && email == null) ? null : new User(userId, email);
     if (attr.isEnabled(Attribute.REQUIRE_APPENGINE_USER)) {
       com.google.appengine.api.users.User appEngineUser =

@@ -21,7 +21,6 @@ import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.when;
 
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
-import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken.Payload;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 import com.google.api.server.spi.auth.common.User;
 import com.google.api.server.spi.config.model.ApiMethodConfig;
@@ -45,25 +44,27 @@ import java.security.GeneralSecurityException;
 public class GoogleJwtAuthenticatorTest {
   private static final String TOKEN = "abcdefjh.abcdefjh.abcdefjh";
   private static final String EMAIL = "dummy@gmail.com";
+  private static final String PRIMARY_EMAIL = "primary@gmail.com";
   private static final String CLIENT_ID = "clientId1";
   private static final String AUDIENCE = "audience1";
   private static final String USER_ID = "1234567";
 
-  private Payload payload;
+  private GoogleCustomIdToken.Payload payload;
   private GoogleJwtAuthenticator authenticator;
   private MockHttpServletRequest request;
   private Attribute attr;
 
-  @Mock private GoogleIdTokenVerifier verifier;
-  @Mock private GoogleIdToken token;
+  @Mock private GoogleCustomIdTokenVerifier verifier;
+  @Mock private GoogleCustomIdToken token;
   @Mock protected ApiMethodConfig config;
 
   @Before
   public void setUp() throws Exception {
-    payload = new Payload();
+    payload = new GoogleCustomIdToken.Payload();
     payload.setAuthorizedParty(CLIENT_ID);
     payload.setAudience(AUDIENCE);
     payload.setEmail(EMAIL);
+    payload.setPrimaryEmail(PRIMARY_EMAIL);
     payload.setSubject(USER_ID);
     authenticator = new GoogleJwtAuthenticator(verifier);
     request = new MockHttpServletRequest();
@@ -131,7 +132,7 @@ public class GoogleJwtAuthenticatorTest {
     when(verifier.verify(TOKEN)).thenReturn(token);
     when(config.getAudiences()).thenReturn(ImmutableList.of(AUDIENCE));
     User user = authenticator.authenticate(request);
-    assertEquals(EMAIL, user.getEmail());
+    assertEquals(PRIMARY_EMAIL, user.getEmail());
     assertEquals(USER_ID, user.getId());
     assertNotNull(attr.get(Attribute.ID_TOKEN));
   }
@@ -142,7 +143,7 @@ public class GoogleJwtAuthenticatorTest {
     when(config.getClientIds()).thenReturn(ImmutableList.of(CLIENT_ID));
     when(config.getAudiences()).thenReturn(ImmutableList.of(AUDIENCE));
     User user = authenticator.authenticate(request);
-    assertEquals(EMAIL, user.getEmail());
+    assertEquals(PRIMARY_EMAIL, user.getEmail());
     assertEquals(USER_ID, user.getId());
     GoogleIdToken idToken = attr.get(Attribute.ID_TOKEN);
     assertNotNull(idToken);
@@ -157,11 +158,11 @@ public class GoogleJwtAuthenticatorTest {
     when(config.getClientIds()).thenReturn(ImmutableList.of(CLIENT_ID));
     when(config.getAudiences()).thenReturn(ImmutableList.of(AUDIENCE));
     User user = authenticator.authenticate(request);
-    assertEquals(EMAIL, user.getEmail());
+    assertEquals(PRIMARY_EMAIL, user.getEmail());
     assertEquals(USER_ID, user.getId());
     com.google.appengine.api.users.User appEngineuser =
         attr.get(Attribute.AUTHENTICATED_APPENGINE_USER);
-    assertEquals(EMAIL, appEngineuser.getEmail());
+    assertEquals(PRIMARY_EMAIL, appEngineuser.getEmail());
     assertNull(appEngineuser.getUserId());
   }
 }
