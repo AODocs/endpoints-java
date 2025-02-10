@@ -71,8 +71,8 @@ def configureMaven(project, projectName, projectDescription) {
     publishing {
       repositories {
         maven {
-          def releasesRepoUrl = "https://aodocs.jfrog.io/aodocs/aodocs-java-release/"
-          def snapshotsRepoUrl = "https://aodocs.jfrog.io/aodocs/aodocs-java-snapshot/"
+          def releasesRepoUrl = "https://aodocs.jfrog.io/artifactory/aodocs-java-release/"
+          def snapshotsRepoUrl = "https://aodocs.jfrog.io/artifactory/aodocs-java-snapshot/"
           url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
           credentials {
             username = ossrhUsername
