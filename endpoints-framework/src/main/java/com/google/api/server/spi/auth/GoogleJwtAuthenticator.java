@@ -92,9 +92,9 @@ public class GoogleJwtAuthenticator implements Authenticator {
       logger.atWarning().log("Audience is not allowed: %s", audience);
       return null;
     }
-
+    
     String userId = idToken.getPayload().getSubject();
-    String email = idToken.getPayload().getPrimaryEmail();
+    String email = idToken.getPayload().getEmail();
     User user = (userId == null && email == null) ? null : new User(userId, email);
     if (attr.isEnabled(Attribute.REQUIRE_APPENGINE_USER)) {
       com.google.appengine.api.users.User appEngineUser =
