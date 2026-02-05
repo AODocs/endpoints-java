@@ -21,6 +21,7 @@ package com.google.api.server.spi;
  */
 public class EnvUtil {
   public static final String ENV_APPENGINE_RUNTIME = "com.google.appengine.runtime.environment";
+  public static final String FORCE_AUTHENTICATION_ENABLED = "com.aodocs.auth.force.enabled";
   public static final String ENV_APPENGINE_PROD = "Production";
   private static final String ORIGINAL_APPENGINE_RUNTIME_ENV =
       System.getProperty(EnvUtil.ENV_APPENGINE_RUNTIME);
@@ -55,5 +56,12 @@ public class EnvUtil {
   public static boolean isRunningOnAppEngineProd() {
     String property = System.getProperty(ENV_APPENGINE_RUNTIME);
     return property != null && property.equals(ENV_APPENGINE_PROD);
+  }
+  
+  /**
+   * Returns whether force authentication is enabled.
+   */
+  public static boolean hasForceAuthenticationEnabled() {
+    return Boolean.parseBoolean(System.getProperty(FORCE_AUTHENTICATION_ENABLED));
   }
 }
