@@ -29,6 +29,7 @@ import org.junit.runners.JUnit4;
  */
 @RunWith(JUnit4.class)
 public class EnvUtilTest {
+  @Test
   public void testIsRunningOnAppEngine() {
     System.setProperty(EnvUtil.ENV_APPENGINE_RUNTIME, "Production");
     assertTrue(EnvUtil.isRunningOnAppEngine());
@@ -44,5 +45,17 @@ public class EnvUtilTest {
     assertFalse(EnvUtil.isRunningOnAppEngineProd());
     System.clearProperty(EnvUtil.ENV_APPENGINE_RUNTIME);
     assertFalse(EnvUtil.isRunningOnAppEngineProd());
+  }
+
+  @Test
+  public void testHasForceAuthenticationEnabled() {
+    System.setProperty(EnvUtil.FORCE_AUTHENTICATION_ENABLED, "true");
+    assertTrue(EnvUtil.hasForceAuthenticationEnabled());
+    System.setProperty(EnvUtil.FORCE_AUTHENTICATION_ENABLED, "false");
+    assertFalse(EnvUtil.hasForceAuthenticationEnabled());
+    System.setProperty(EnvUtil.FORCE_AUTHENTICATION_ENABLED, "invalid");
+    assertFalse(EnvUtil.hasForceAuthenticationEnabled());
+    System.clearProperty(EnvUtil.FORCE_AUTHENTICATION_ENABLED);
+    assertFalse(EnvUtil.hasForceAuthenticationEnabled());
   }
 }

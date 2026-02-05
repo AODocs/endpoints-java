@@ -15,6 +15,8 @@
  */
 package com.google.api.server.spi.request;
 
+import static com.google.api.server.spi.EnvUtil.hasForceAuthenticationEnabled;
+
 import com.google.api.server.spi.EnvUtil;
 import com.google.api.server.spi.ServiceException;
 import com.google.api.server.spi.auth.EndpointsAuthenticator;
@@ -86,7 +88,7 @@ public class Auth {
    * only run once per request.
    */
   com.google.appengine.api.users.User authenticateAppEngineUser() throws ServiceException {
-    if (!EnvUtil.isRunningOnAppEngine()) {
+    if (!EnvUtil.isRunningOnAppEngine() && !hasForceAuthenticationEnabled()) {
       return null;
     }
     attr.set(Attribute.REQUIRE_APPENGINE_USER, true);

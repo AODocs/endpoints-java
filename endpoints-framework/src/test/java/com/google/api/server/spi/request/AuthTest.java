@@ -155,4 +155,22 @@ public class AuthTest {
     assertNull(attr.get(Attribute.AUTHENTICATED_APPENGINE_USER));
     assertEquals(AppEngineAuthenticator.APP_ENGINE_USER, auth.authenticateAppEngineUser());
   }
+
+  @Test
+  public void testAuthenticateAppEngineUser_notOnAppEngine_forceAuthDisabled() throws Exception {
+    System.clearProperty(EnvUtil.ENV_APPENGINE_RUNTIME);
+    System.clearProperty(EnvUtil.FORCE_AUTHENTICATION_ENABLED);
+    
+    assertNull(auth.authenticateAppEngineUser());
+  }
+
+  @Test
+  public void testAuthenticateAppEngineUser_notOnAppEngine_forceAuthEnabled() throws Exception {
+    System.clearProperty(EnvUtil.ENV_APPENGINE_RUNTIME);
+    System.setProperty(EnvUtil.FORCE_AUTHENTICATION_ENABLED, "true");
+    when(config.getAuthenticators())
+        .thenReturn(ImmutableList.of(PassAuthenticator.class));
+    assertEquals(AppEngineAuthenticator.APP_ENGINE_USER, auth.authenticateAppEngineUser());
+    System.clearProperty(EnvUtil.FORCE_AUTHENTICATION_ENABLED);
+  }
 }
